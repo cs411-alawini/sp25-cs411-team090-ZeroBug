@@ -25,4 +25,4 @@
 
 ## Project Summary
 
-This is a summary of the project!
+Write a summary of the project here
