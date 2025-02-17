@@ -51,6 +51,7 @@ A rough UI sketch will include:
 - **Transaction Entry Page:** A form to add/edit transactions.
 - **Visualization Page:** Graphs displaying financial data.
 - **Settings Page:** Currency preferences, budget customization.
+![UI Mockup](assets/UI-mockup.svg)
 
 (A PowerPoint sketch or hand-drawn wireframe will be included in the final submission.)
 
