@@ -1,0 +1,70 @@
+# Personal Finance Tracker Project Proposal
+
+## Project Title
+**Personal Finance Tracker**
+
+## Project Summary
+The **Personal Finance Tracker** is a web-based application designed to help users manage their financial transactions efficiently. It allows users to log income and expenses, categorize transactions, set savings goals, and visualize their financial health through interactive charts. The platform aims to provide an intuitive and automated way to track spending habits and make informed financial decisions.
+
+## Application Description
+Many individuals struggle to manage their finances effectively due to a lack of tools for tracking their daily expenses and income. This project addresses this issue by providing a user-friendly interface where users can log their transactions, set financial goals, and analyze their spending patterns.
+
+The primary objectives of this application include:
+- **Expense and income tracking:** Users can log transactions and categorize them.
+- **Data visualization:** Charts and graphs to help users understand spending trends.
+- **Multi-currency support:** Real-time currency exchange rate tracking.
+
+## Creative Component
+To enhance functionality and user experience, we propose the following advanced features:
+1. **Interactive Financial Visualization:** Advanced data visualization using libraries like D3.js or Chart.js to dynamically present spending trends and insights.
+2. **Multi-Currency Support:** Integration with an API like [ExchangeRate-API](https://www.exchangerate-api.com/) to allow transactions in different currencies and automatic conversion.
+
+## Usefulness
+The **Personal Finance Tracker** is useful for individuals who want to maintain better control over their finances. The key functionalities include:
+- **Adding, updating, and deleting transactions** categorized by type (income/expense).
+- **Filtering transactions** by date, category, and amount.
+- **Visualizing financial data** through pie charts, bar graphs, and line charts.
+- **Setting and tracking savings goals**.
+
+Existing finance management tools like **Mint** and **YNAB** offer similar features, but they often require subscriptions or lack the simplicity that many users desire. Our application differentiates itself by focusing on **ease of use** and **multi-currency support**.
+
+## Realness (Data Sources)
+To ensure the application handles real financial data, we will integrate at least two real-world data sources:
+1. **User-Generated Transaction Data** – Users input financial transactions manually.
+2. **Currency Exchange Rate API** – Integration with an exchange rate API (e.g., [ExchangeRate-API](https://www.exchangerate-api.com/)) to support multi-currency tracking.
+
+## Functionality
+The application provides the following key functionalities:
+### **Basic Features**
+- **Create, Read, Update, Delete (CRUD) transactions** (income/expenses).
+- **Categorize transactions** (e.g., groceries, rent, entertainment).
+- **Search and filter transactions** based on category, amount, and date.
+- **Set and track financial goals.**
+
+### **Advanced Features**
+- **Data visualization dashboard** with interactive charts.
+- **Multi-currency transactions with real-time conversion.**
+
+## Low-Fidelity UI Mockup
+A rough UI sketch will include:
+- **Homepage Dashboard:** Overview of spending trends, total balance, and alerts.
+- **Transaction Entry Page:** A form to add/edit transactions.
+- **Visualization Page:** Graphs displaying financial data.
+- **Settings Page:** Currency preferences, budget customization.
+
+(A PowerPoint sketch or hand-drawn wireframe will be included in the final submission.)
+
+## Project Work Distribution
+| Team Member | Responsibility |
+|-------------|---------------|
+| Member 1 | Backend development: Database design, CRUD APIs |
+| Member 2 | Frontend development: UI design, charts, form handling |
+| Member 3 | data processing, currency API integration |
+| Member 4 | Deployment, documentation, and presentation preparation |
+
+## Backend System Distribution
+- **Database:** PostgreSQL/MySQL for storing transactions, user data, and budgets.
+- **API Integration:** Currency exchange.
+- **Authentication:** Secure user login using OAuth or JWT.
+- **Deployment:** Hosted on AWS/Heroku with CI/CD pipelines.
+
