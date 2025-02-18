@@ -30,10 +30,10 @@ The **Personal Finance Tracker** is useful for individuals who want to maintain 
 - **Visualizing financial data** through pie charts, bar graphs, and line charts.
 - **Setting and tracking savings goals**.
 
-Existing finance management tools like **Mint** and **YNAB** offer similar features, but they often require subscriptions or lack the simplicity that many users desire. Our application differentiates itself by focusing on **ease of use** and **multi-currency support**.
+Existing finance management tools like **Mint** and **YNAB** offer similar features, but they often require subscriptions or lack the simplicity that many users desire. Our application differentiates itself by focusing on **ease of use** and **multi-currency support**. This allows our application to have an additional user base in international students, who may have expenses using different currencies, especially when returning home. 
 
 ## Realness (Data Sources)
-To ensure the application handles real financial data, we will integrate at least two real-world data sources:
+To ensure the application handles real financial data, we will integrate at least two real-world data sources including:
 1. **User-Generated Transaction Data** – Users input financial transactions manually.
 2. **Currency Exchange Rate API** – Integration with an exchange rate API (e.g., [ExchangeRate-API](https://www.exchangerate-api.com/)) to support multi-currency tracking.
 
@@ -41,23 +41,23 @@ To ensure the application handles real financial data, we will integrate at leas
 The application provides the following key functionalities:
 ### **Basic Features**
 - **Create, Read, Update, Delete (CRUD) transactions** (income/expenses).
-  - Create:Users can make new financial transactions by entering relevant information including payment amount alongside category   
-  selection and recording date along with payment method and currency choice. The system will preserve transactions within the database 
-  which automatically displays them in the dashboard.
-  - Read:Users benefit from a complete overview of their previous financial movements which they can refine by date intervals, financial   
-  categories, transaction amounts or organize them via their preferred order to examine their spending patterns. Users will find a summative 
-  display which shows total income and expenses and current account balance in the system.
-  - Update:Users have an option to change details for active transactions including category selection and changing amounts and dates. All 
+  - Create: Users can make new financial transactions by entering relevant information including payment amount, category   
+  selection, date, along with payment method and currency choice. The system will preserve transactions within the database 
+  which automatically displays them in the dashboard. These transactions will be automatically converted into a specific currency based on real-time exchange rates. 
+  - Read: Users benefit from a complete overview of their previous financial movements which they can refine by date intervals, financial   
+  categories, transaction amounts or organize them via their preferred order to examine their spending patterns. Users will find an overall 
+  display which shows total income and expenses and current account balance in the system. Additionally, FinTrack will make suggestions for categories to reduce spending in. 
+  - Update: Users have an option to change details for active transactions including category selection and changing amounts and dates. All 
   modifications made to financial data in the system automatically display within both summary views and visual displays.
-  - Delete:Users can remove unnecessary or incorrect transactions from their records. Deleting a transaction will update the total balance 
+  - Delete: Users can remove unnecessary or incorrect transactions from their records. Deleting a transaction will update the total balance 
   and spending insights to maintain accuracy in financial tracking.
-- **Categorize transactions** (e.g., groceries, rent, entertainment).
-- **Search and filter transactions** based on category, amount, and date.
-- **Set and track financial goals.**
+- **Categorize transactions** (e.g., groceries, rent, entertainment). This allows for clear understanding of where money is going
+- **Search and filter transactions** based on category, amount, and date. 
+- **Set and track financial goals**
 
 ### **Advanced Features**
-- **Data visualization dashboard** with interactive charts.
-- **Multi-currency transactions with real-time conversion.**
+- **Data visualization dashboard** with interactive charts where users are able to sort and select based on category, date, and more. 
+- **Multi-currency transactions with real-time conversion.** This allows users to input spending in various currencies, as well as keep track of exchange rates. 
 
 ## Low-Fidelity UI Mockup
 A rough UI sketch will include:
