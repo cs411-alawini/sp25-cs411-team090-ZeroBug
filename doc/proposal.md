@@ -1,10 +1,14 @@
 # Personal Finance Tracker Project Proposal
 
+<p align="center">
+  <img src="assets/logo.svg" width="450">
+</p>
+
 ## Project Title
-**Personal Finance Tracker**
+**FinTrack**
 
 ## Project Summary
-The **Personal Finance Tracker** is a web-based application designed to help users manage their financial transactions efficiently. It allows users to log income and expenses, categorize transactions, set savings goals, and visualize their financial health through interactive charts. The platform aims to provide an intuitive and automated way to track spending habits and make informed financial decisions.
+The **FinTrack** is a web-based application designed to help users manage their financial transactions efficiently. It allows users to log income and expenses, categorize transactions, set savings goals, and visualize their financial health through interactive charts. The platform aims to provide an intuitive and automated way to track spending habits and make informed financial decisions.
 
 ## Application Description
 Many individuals struggle to manage their finances effectively due to a lack of tools for tracking their daily expenses and income. This project addresses this issue by providing a user-friendly interface where users can log their transactions, set financial goals, and analyze their spending patterns.
