@@ -41,15 +41,15 @@ To ensure the application handles real financial data, we will integrate at leas
 The application provides the following key functionalities:
 ### **Basic Features**
 - **Create, Read, Update, Delete (CRUD) transactions** (income/expenses).
-  - **Create:Users can make new financial transactions by entering relevant information including payment amount alongside category   
+  - Create:Users can make new financial transactions by entering relevant information including payment amount alongside category   
   selection and recording date along with payment method and currency choice. The system will preserve transactions within the database 
   which automatically displays them in the dashboard.
-  - **Read:Users benefit from a complete overview of their previous financial movements which they can refine by date intervals, financial   
+  - Read:Users benefit from a complete overview of their previous financial movements which they can refine by date intervals, financial   
   categories, transaction amounts or organize them via their preferred order to examine their spending patterns. Users will find a summative 
   display which shows total income and expenses and current account balance in the system.
-  - **Update:Users have an option to change details for active transactions including category selection and changing amounts and dates. All 
+  - Update:Users have an option to change details for active transactions including category selection and changing amounts and dates. All 
   modifications made to financial data in the system automatically display within both summary views and visual displays.
-  - **Delete:Users can remove unnecessary or incorrect transactions from their records. Deleting a transaction will update the total balance 
+  - Delete:Users can remove unnecessary or incorrect transactions from their records. Deleting a transaction will update the total balance 
   and spending insights to maintain accuracy in financial tracking.
 - **Categorize transactions** (e.g., groceries, rent, entertainment).
 - **Search and filter transactions** based on category, amount, and date.
