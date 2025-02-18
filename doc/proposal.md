@@ -36,8 +36,9 @@ Existing finance management tools like **Mint** and **YNAB** offer similar featu
 To ensure the application handles real financial data, we will integrate at least two real-world data sources including:
 1. **User-Generated Transaction Data** – Users input financial transactions manually.
 2. **Currency Exchange Rate API** – Integration with an exchange rate API (e.g., [ExchangeRate-API](https://www.exchangerate-api.com/)) to support multi-currency tracking.
-3. **Personal Finance Dataset from Kaggle** – A dataset containing categorized personal expenses, helping to analyze spending patterns. Example: [Kaggle Personal Finance Dataset](https://www.kaggle.com/datasets/bukolafatunde/personal-finance?select=personal_transactions.csv).
-4. **Bank Transactions Dataset from Kaggle** – A dataset simulating real-world banking transactions, useful for training and testing features like automated transaction categorization. Example: [Kaggle Bank Transactions Dataset](https://www.kaggle.com/datasets/priyamchoksi/credit-card-transactions-dataset).
+3. **Personal Finance Dataset from Kaggle** – A dataset containing categorized personal expenses, helping to analyze spending patterns. Example: [Kaggle Personal Finance Dataset](https://www.kaggle.com/datasets/bukolafatunde/personal-finance?select=personal_transactions.csv) (Format: .csv Cardinality: 806 Degree: 6). This includes dates, names, transaction types (debit/credit), categories, and account name of each transaction. 
+4. **Bank Transactions Dataset from Kaggle** – A dataset simulating real-world banking transactions, useful for training and testing features like automated transaction categorization. Example: [Kaggle Bank Transactions Dataset](https://www.kaggle.com/datasets/priyamchoksi/credit-card-transactions-dataset) (Format: .csv Cardinality: 1.30m Degree: 24). This dataset includes the date, category, amounts, and names of the users who made transactions.
+5. We will also be able to randomly assign transactions to users to simulate a variety of user transaction types. 
 
 
 
