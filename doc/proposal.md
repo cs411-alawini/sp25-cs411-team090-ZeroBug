@@ -33,16 +33,11 @@ The **Personal Finance Tracker** is useful for individuals who want to maintain 
 Existing finance management tools like **Mint** and **YNAB** offer similar features, but they often require subscriptions or lack the simplicity that many users desire. Our application differentiates itself by focusing on **ease of use** and **multi-currency support**. This allows our application to have an additional user base in international students, who may have expenses using different currencies, especially when returning home. 
 
 ## Realness (Data Sources)
-<<<<<<< HEAD
-To ensure the application handles real financial data, we will integrate at least two real-world data sources:
-
-=======
 To ensure the application handles real financial data, we will integrate at least two real-world data sources including:
->>>>>>> 544786094550e109f23a7898fab52b7bca48fcbf
 1. **User-Generated Transaction Data** – Users input financial transactions manually.
 2. **Currency Exchange Rate API** – Integration with an exchange rate API (e.g., [ExchangeRate-API](https://www.exchangerate-api.com/)) to support multi-currency tracking.
-3. **Personal Finance Dataset from Kaggle** – A dataset containing categorized personal expenses, helping to analyze spending patterns. Example: [Kaggle Personal Finance Dataset](https://www.kaggle.com/datasets/abhilashayagyaseni/personal-finance-dataset).
-4. **Bank Transactions Dataset from Kaggle** – A dataset simulating real-world banking transactions, useful for training and testing features like automated transaction categorization. Example: [Kaggle Bank Transactions Dataset](https://www.kaggle.com/datasets/ealaxi/banksim1).
+3. **Personal Finance Dataset from Kaggle** – A dataset containing categorized personal expenses, helping to analyze spending patterns. Example: [Kaggle Personal Finance Dataset](https://www.kaggle.com/datasets/bukolafatunde/personal-finance?select=personal_transactions.csv).
+4. **Bank Transactions Dataset from Kaggle** – A dataset simulating real-world banking transactions, useful for training and testing features like automated transaction categorization. Example: [Kaggle Bank Transactions Dataset](https://www.kaggle.com/datasets/priyamchoksi/credit-card-transactions-dataset).
 
 
 
@@ -69,21 +64,17 @@ The application provides the following key functionalities:
 - **Multi-currency transactions with real-time conversion.** This allows users to input spending in various currencies, as well as keep track of exchange rates. 
 
 ## Low-Fidelity UI Mockup
-A rough UI sketch will include:
-- **Homepage Dashboard:** Overview of spending trends, total balance, and alerts.
-- **Transaction Entry Page:** A form to add/edit transactions.
-- **Visualization Page:** Graphs displaying financial data.
-- **Settings Page:** Currency preferences, budget customization.
+
 ![UI Mockup](assets/UI-mockup.svg)
 
 
 ## Project Work Distribution
 | Team Member | Responsibility |
 |-------------|---------------|
-| Member 1 | Backend development: Database design, CRUD APIs |
-| Member 2 | Frontend development: UI design, charts, form handling |
-| Member 3 | data processing, currency API integration |
-| Member 4 | Deployment, documentation, and presentation preparation |
+| Hanna | Backend development: Database design, CRUD APIs |
+| Yuhao | Frontend development: UI design, charts, form handling |
+| Hanzhang | data processing, currency API integration |
+| Tong | Deployment, documentation, and presentation preparation |
 
 ## Backend System Distribution
 - **Database:** PostgreSQL/MySQL for storing transactions, user data, and budgets.
