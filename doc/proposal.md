@@ -34,8 +34,13 @@ Existing finance management tools like **Mint** and **YNAB** offer similar featu
 
 ## Realness (Data Sources)
 To ensure the application handles real financial data, we will integrate at least two real-world data sources:
+
 1. **User-Generated Transaction Data** – Users input financial transactions manually.
 2. **Currency Exchange Rate API** – Integration with an exchange rate API (e.g., [ExchangeRate-API](https://www.exchangerate-api.com/)) to support multi-currency tracking.
+3. **Personal Finance Dataset from Kaggle** – A dataset containing categorized personal expenses, helping to analyze spending patterns. Example: [Kaggle Personal Finance Dataset](https://www.kaggle.com/datasets/abhilashayagyaseni/personal-finance-dataset).
+4. **Bank Transactions Dataset from Kaggle** – A dataset simulating real-world banking transactions, useful for training and testing features like automated transaction categorization. Example: [Kaggle Bank Transactions Dataset](https://www.kaggle.com/datasets/ealaxi/banksim1).
+
+
 
 ## Functionality
 The application provides the following key functionalities:
@@ -57,7 +62,6 @@ A rough UI sketch will include:
 - **Settings Page:** Currency preferences, budget customization.
 ![UI Mockup](assets/UI-mockup.svg)
 
-(A PowerPoint sketch or hand-drawn wireframe will be included in the final submission.)
 
 ## Project Work Distribution
 | Team Member | Responsibility |

@@ -23,6 +23,10 @@
 | System URL  |      link_to_system    |
 | Video Link  |      link_to_video     |
 
+<p align="center">
+  <img src="doc/assets/logo.svg" width="450">
+</p>
+
 ## Project Summary
 
 The Personal Finance Tracker is a web-based application designed to help users manage their financial transactions efficiently. It allows users to log income and expenses, categorize transactions, set savings goals, and visualize their financial health through interactive charts. Key features include:
