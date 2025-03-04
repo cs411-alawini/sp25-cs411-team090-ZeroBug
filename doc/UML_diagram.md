@@ -2,7 +2,6 @@
 
 ## UML Diagram
 
-We have marked the primary keys with `[PK]` for clarity in our UML diagram below.
 
 ![UML Diagram](assets/FinTrack.drawio.svg)
 ## Assumptions and Description of Entities and Relationships
