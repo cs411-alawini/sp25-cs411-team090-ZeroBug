@@ -4,50 +4,7 @@
 
 We have marked the primary keys with `[PK]` for clarity in our UML diagram below.
 
-```mermaid
-classDiagram
-  class User {
-      user_id [PK]
-      name
-      email UNIQUE
-      password_hash
-      base_currency
-  }
-  class Transaction {
-      transaction_id [PK]
-      user_id [FK]
-      category_id [FK]
-      amount
-      currency_code [FK]
-      transaction_date
-      payment_method
-      description
-  }
-  class Category {
-      category_id [PK]
-      category_name UNIQUE
-      category_type ENUM('Income', 'Expense')
-  }
-  class SavingsGoal {
-      goal_id [PK]
-      user_id [FK]
-      goal_name
-      target_amount
-      current_savings
-      deadline
-  }
-  class CurrencyExchange {
-      currency_code [PK]
-      exchange_rate_to_base
-      last_updated
-  }
-
-User "1..1" -- "1..*" Transaction : Owns
-Transaction "M..1" -- "1..1" Category : BelongsTo
-User "1..1" -- "0..*" SavingsGoal : HasGoal
-Transaction "M..1" -- "1..1" CurrencyExchange : ConvertedBy
-```
-
+![UML Diagram](assets/FinTrack.drawio.svg)
 ## Assumptions and Description of Entities and Relationships
 
 ### Entities
