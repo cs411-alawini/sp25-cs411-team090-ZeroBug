@@ -23,18 +23,33 @@ To enhance functionality and user experience, we propose the following advanced 
 1. **Interactive Financial Visualization:**
   - Advanced data visualization using libraries like D3.js or Chart.js to dynamically present spending trends and insights.
   - Users can interact with graphs, filter transactions, and visualize their expenses by category, time period, or currency.
+  - The interface will include customizable dashboards where users can select which financial metrics they want to prioritize. This allows users to personalize their experiences. 
+  - Users will be able to export visualizations as PDFs or images for reporting or record-keeping purposes. 
+  - Comparison tools will enable users to analyze spending patterns between different time periods ("Aug vs. Sep" or "2022 vs. 2023"), allowing users to more easily track spending/budgeting procress.
+  - charts will be incorporated to allow users to compare income vs. expenses side by side for a more insightful financial overview.
+  - Bar charts will help visualize how different spending categories contribute to total expenses over time.
+  - Real-time updates will allow users to see their financial summary dynamically change as they add or edit transactions.
 2. **Multi-Currency Support:**
   - Integration with an API like [ExchangeRate-API](https://www.exchangerate-api.com/) to allow transactions in different currencies and automatic conversion.
+  - Users can set a preferred base currency, ensuring all transactions are converted consistently.
+  - A historical exchange rate tracking will be implemented, allowing users to view conversion rates at the time of the transaction rather than only the current rate to see overall trends.
+  - An option for users to manually override exchange rates will be provided if they received a different rate (Ex. from a bank or currency exchange service).
+  - Because of support for multi-currency budgets, users will be able to set spending limits in different currencies while maintaining a unified financial overview.
+  - A currency switcher will be included, allowing users to view their financial data in different currencies with real-time conversion.
+3. **Budget Recommendation System:**
+  - Users can set financial management goals and track their progress toward completion.
+  - The budget module will allow users to set recurring budgets (rent, monthly groceries, etc) for accurate budgeting functionality.
+  - Users will receive real-time spending alerts when they approach or exceed a set budget limit.
+  - A budget log will store past budgets, allowing users to analyze how their spending and budgeting habits have changed over time.
+  - The system will provide spending breakdowns within each budget, allowing users to see which transactions are contributing most to their expenses.
 
-3. **Personalized Budgeting & Spending Insights**
+4. **Personalized Budgeting & Spending Insights**
 - Use **reinforcement learning or historical data analysis** to suggest **personalized budgets** based on past spending habits.
 - The system will **predict future expenses** using **time-series forecasting models (e.g., LSTM, ARIMA)** and recommend **budget adjustments** to prevent overspending.
 - Users will receive **smart alerts** such as:  
   - _"You are spending 15% more on dining this month than last month. Consider adjusting your budget."_
   - _"Based on your current trends, you might exceed your monthly budget in 10 days."_
 
-4. **Budget Recommendation System:**
-  - Users can set financial management goals and track their progress toward completion.
     
 
 ## Usefulness
