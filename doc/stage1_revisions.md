@@ -1,7 +1,5 @@
 # Stage 1 Revisions
 
-## Summary of Changes
-
 ## Feedback On Stage 1
 
 - The feedback mentioned that the Creative Components section needed more elaboration. Especially to better describe what the visualizations represent and how they improve functionality. It was suggested that we provide a clearer explanation of what users will gain from these interactive visualizations.
