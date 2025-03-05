@@ -31,11 +31,37 @@
 - Used to convert transactions into a base currency for accurate financial tracking.
 
 ### Relationships
-- **User ↔ Transaction (1:M):** A user can have multiple transactions.
-- **Transaction ↔ Category (M:1):** Each transaction belongs to one category.
-- **User ↔ SavingsGoal (1:M):** A user can define multiple savings goals.
-- **Transaction ↔ Currency Exchange (M:1):** Each transaction has a currency that is converted using real-time rates.
-
+- **User ↔ Transaction (1:M):**
+- Explanation:
+A User can record multiple Transaction entries, but each Transaction is associated with only one User.
+This ensures that all financial transactions are linked to an individual user for personal tracking and accountability.
+- Business Rules:
+Each transaction is uniquely owned by a user and cannot be shared.
+If a user deletes their account, their associated transactions may either be deleted (if personal records are not needed) or anonymized for analytics.
+- **Transaction ↔ Category (M:1):**
+- Explanation:
+Each Transaction belongs to exactly one Category, such as "Groceries," "Rent," or "Salary."
+A single Category can have multiple transactions associated with it, allowing users to analyze spending patterns by category.
+- Business Rules:
+Every transaction must be assigned a category to maintain financial organization.
+Categories are classified as either Income or Expense (category_type attribute).
+A transaction cannot belong to multiple categories, ensuring clear classification of each financial entry.
+- **User ↔ SavingsGoal (1:M):**
+- Explanation:
+A User can set multiple SavingsGoal entries to track different financial objectives (e.g., "Vacation Fund," "Emergency Savings").
+Each SavingsGoal is exclusively linked to one User, ensuring that savings targets are individualized.
+- Business Rules:
+Users must define a target_amount and deadline for each savings goal.
+Users can update their current_savings periodically to track progress toward their financial objectives.
+If a user deletes an account, their savings goals will also be removed or anonymized.
+- **Transaction ↔ Currency Exchange (M:1):**
+- Explanation:
+Each Transaction records a currency_code, which refers to the CurrencyExchange table for exchange rate conversion.
+The CurrencyExchange entity stores real-time exchange rates for accurate financial tracking across multiple currencies.
+- Business Rules:
+Transactions should store the exchange rate at the time of the transaction to ensure historical accuracy.
+Exchange rates can be updated regularly (e.g., daily or hourly) from external sources.
+If a currency exchange rate is missing, the system should flag the transaction for manual review or fallback to the last known rate.
 ## Normalization - 3NF Compliance
 
 - **User Table**: No repeating groups, dependencies on primary key only.
