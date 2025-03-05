@@ -20,8 +20,14 @@ The primary objectives of this application include:
 
 ## Creative Component
 To enhance functionality and user experience, we propose the following advanced features:
-1. **Interactive Financial Visualization:** Advanced data visualization using libraries like D3.js or Chart.js to dynamically present spending trends and insights.
-2. **Multi-Currency Support:** Integration with an API like [ExchangeRate-API](https://www.exchangerate-api.com/) to allow transactions in different currencies and automatic conversion.
+1. **Interactive Financial Visualization:**
+  - Advanced data visualization using libraries like D3.js or Chart.js to dynamically present spending trends and insights.
+  - Users can interact with graphs, filter transactions, and visualize their expenses by category, time period, or currency.
+2. **Multi-Currency Support:**
+  - Integration with an API like [ExchangeRate-API](https://www.exchangerate-api.com/) to allow transactions in different currencies and automatic conversion.
+3. **Budget Recommendation System:**
+  - Users can set financial management goals and track their progress toward completion.
+    
 
 ## Usefulness
 The **Personal Finance Tracker** is useful for individuals who want to maintain better control over their finances. The key functionalities include:
