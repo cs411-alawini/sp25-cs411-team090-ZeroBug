@@ -44,10 +44,10 @@ To enhance functionality and user experience, we propose the following advanced 
   - The system will provide spending breakdowns within each budget, allowing users to see which transactions are contributing most to their expenses.
 
 4. **Personalized Budgeting & Spending Insights**
-- Use **reinforcement learning or historical data analysis** to suggest **personalized budgets** based on past spending habits.
-- The system will **predict future expenses** using **time-series forecasting models (e.g., LSTM, ARIMA)** and recommend **budget adjustments** to prevent overspending.
-- Users will receive **smart alerts** such as:  
-  - _"You are spending 15% more on dining this month than last month. Consider adjusting your budget."_
+- Use reinforcement learning or historical data analysis to suggest personalized budgets based on past spending habits.
+- The system will predict future expenses using time-series forecasting models such as LSTM or ARIMA and recommend budgets to prevent overspending.
+- Users will receive smart alerts such as:  
+  - _"You are spending 15% more on dining this month than last month. Consider adjusting your dining budget to _____."_
   - _"Based on your current trends, you might exceed your monthly budget in 10 days."_
 
     
