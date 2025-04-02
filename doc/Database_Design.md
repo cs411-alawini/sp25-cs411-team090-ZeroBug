@@ -42,3 +42,86 @@ CREATE TABLE SavingsGoal (
     FOREIGN KEY (user_id) REFERENCES User(user_id) ON DELETE CASCADE
 );
 
+
+**ADVANCED QUERIES**
+
+SELECT 
+  ca.category_type,
+  SUM(t.amount * cx.exchange_rate_to_base) AS TotalExpense
+FROM Transaction t
+INNER JOIN Category ca ON t.category_id = ca.category_id
+INNER JOIN CurrencyExchange cx ON t.currency_code = cx.currency_code
+WHERE t.transaction_type = 'Normal'
+GROUP BY ca.category_type
+ORDER BY TotalExpense DESC
+LIMIT 15;
+
+
+This query gets transactions where amount is greater than the avg transaction amount for the same person.
+
+SELECT 
+  t.transaction_id,
+  u.user_id,
+  u.name,
+  t.amount,
+  t.transaction_date
+FROM Transaction t
+JOIN User u ON t.user_id = u.user_id
+WHERE t.amount > (
+    SELECT AVG(t2.amount)
+    FROM Transaction t2
+    WHERE t2.user_id = t.user_id
+)
+ORDER BY t.amount DESC
+LIMIT 15;
+![image](https://github.com/user-attachments/assets/55f37f22-58bd-4ad9-8db4-ef67bfe238fa)
+
+ Comparing Expense vs. Income Totals by User
+This query uses a UNION ALL to combine expense and income totals per user. Adjust the transaction types ('Normal' for expense and 'Income' for income) as needed.
+(SELECT 
+  u.user_id,
+  u.name,
+  'Expense' AS trans_type,
+  SUM(t.amount * cx.exchange_rate_to_base) AS Total
+FROM Transaction t
+JOIN User u ON t.user_id = u.user_id
+JOIN CurrencyExchange cx ON t.currency_code = cx.currency_code
+WHERE t.transaction_type = 'Normal'
+GROUP BY u.user_id, u.name)
+UNION ALL
+(SELECT 
+  u.user_id,
+  u.name,
+  'Income' AS trans_type,
+  SUM(t.amount * cx.exchange_rate_to_base) AS Total
+FROM Transaction t
+JOIN User u ON t.user_id = u.user_id
+JOIN CurrencyExchange cx ON t.currency_code = cx.currency_code
+WHERE t.transaction_type = 'Income'
+GROUP BY u.user_id, u.name)
+ORDER BY Total DESC
+LIMIT 15;
+
+![image](https://github.com/user-attachments/assets/62b49bc0-9bbe-406f-b252-8eb9ba0e35e9)
+
+This query finds users who have never made a transaction in a given category ("Food" in this case).
+SELECT 
+  u.user_id,
+  u.name,
+  u.email
+FROM User u
+WHERE u.user_id NOT IN (
+    SELECT t.user_id
+    FROM Transaction t
+    JOIN Category ca ON t.category_id = ca.category_id
+    WHERE ca.category_name = 'Food'
+)
+LIMIT 15;
+
+![image](https://github.com/user-attachments/assets/2af80210-fa42-406d-ba99-902a3c570363)
+
+
+
+
+
+
