@@ -18,7 +18,7 @@ CREATE TABLE Category (
     category_name VARCHAR(50) UNIQUE,
     category_type VARCHAR(10)
 );
-``
+```
 ```sql
 CREATE TABLE CurrencyExchange (
     currency_code VARCHAR(3) PRIMARY KEY,
@@ -143,6 +143,33 @@ LIMIT 15;
 ![image](https://github.com/user-attachments/assets/2af80210-fa42-406d-ba99-902a3c570363)
 
 
+Total Personal Expense for each Person
+```sql
+SELECT u.Name, u.user_id, (
+    SELECT COALESCE(SUM(t1.amount * c1.exchange_rate_to_base), 0)
+    FROM Transaction t1
+    INNER JOIN CurrencyExchange c1 ON t1.currency_code = c1.currency_code
+    INNER JOIN Category ca1 ON ca1.category_id = t1.category_id
+    WHERE t1.user_id = u.user_id AND ca1.category_type = 'Expense'
+) as PersonalTotalExpense
+FROM User u
+WHERE (
+    SELECT COALESCE(SUM(t1.amount * c1.exchange_rate_to_base), 0)
+    FROM Transaction t1
+    INNER JOIN CurrencyExchange c1 ON t1.currency_code = c1.currency_code
+    INNER JOIN Category ca1 ON ca1.category_id = t1.category_id
+    WHERE t1.user_id = u.user_id AND ca1.category_type = 'Expense'
+) > (
+    SELECT COALESCE(SUM(t1.amount * c1.exchange_rate_to_base), 0)
+    FROM Transaction t1
+    INNER JOIN CurrencyExchange c1 ON t1.currency_code = c1.currency_code
+    INNER JOIN Category ca1 ON ca1.category_id = t1.category_id
+    WHERE t1.user_id = u.user_id AND ca1.category_type = 'Income'
+)
+ORDER BY u.Name DESC
+LIMIT 15;
+```
+![image](https://github.com/user-attachments/assets/85bf3ae0-b66c-4c3a-858b-0d98bbf672e4)
 
 
 
