@@ -43,8 +43,11 @@ CREATE TABLE SavingsGoal (
 );
 
 
-**ADVANCED QUERIES**
+# Advanced Queries
 
+## Total Expense by Category
+
+```sql
 SELECT 
   ca.category_type,
   SUM(t.amount * cx.exchange_rate_to_base) AS TotalExpense
@@ -55,10 +58,11 @@ WHERE t.transaction_type = 'Normal'
 GROUP BY ca.category_type
 ORDER BY TotalExpense DESC
 LIMIT 15;
+```
 
 
 The next query gets transactions where amount is greater than the avg transaction amount for the same person.
-
+```sql
 SELECT 
   t.transaction_id,
   u.user_id,
@@ -74,11 +78,12 @@ WHERE t.amount > (
 )
 ORDER BY t.amount DESC
 LIMIT 15;
+```
 ![image](https://github.com/user-attachments/assets/55f37f22-58bd-4ad9-8db4-ef67bfe238fa)
 
  *Comparing Expense vs. Income Totals by User*
 The next query uses a UNION ALL to combine expense and income totals per user. 
-
+```sql
 (SELECT 
   u.user_id,
   u.name,
@@ -102,12 +107,12 @@ WHERE t.transaction_type = 'Income'
 GROUP BY u.user_id, u.name)
 ORDER BY Total DESC
 LIMIT 15;
-
+```
 ![image](https://github.com/user-attachments/assets/62b49bc0-9bbe-406f-b252-8eb9ba0e35e9)
 
 The next query finds users who have never made a transaction in a given category ("Food" in this case).
 
-
+```sql
 SELECT 
   u.user_id,
   u.name,
@@ -120,7 +125,7 @@ WHERE u.user_id NOT IN (
     WHERE ca.category_name = 'Food'
 )
 LIMIT 15;
-
+```
 ![image](https://github.com/user-attachments/assets/2af80210-fa42-406d-ba99-902a3c570363)
 
 
