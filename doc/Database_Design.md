@@ -56,8 +56,6 @@ CREATE TABLE SavingsGoal (
 
 # Advanced Queries
 
-## Total Expense by Category
-
 Users with the Highest Spending in Base Currency
 ```sql
 SELECT 
