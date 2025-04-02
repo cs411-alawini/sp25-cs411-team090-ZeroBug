@@ -175,6 +175,15 @@ For Users with the Highest Spending in Base Currency
 We initially selected two index configurations—idx_user_currency_type (user_id, currency_code, transaction_type) and idx_user_currency (user_id, currency_code)—based on a careful analysis of the query’s structure. Since the query joins the Transaction table to both the User and CurrencyExchange tables using user_id and currency_code, these columns were logical candidates for indexing. Additionally, the query includes a WHERE clause that filters on transaction_type = 'Normal', so we included this column in the composite index idx_user_currency_type to potentially support both filtering and joining in a single index. The second index, idx_user_currency, was a leaner version that prioritized join performance alone, under the assumption that filtering might already be efficiently handled by the query planner. These designs aligned with best practices: indexing join keys, filtering attributes, and avoiding indexing columns not used in the query. Despite testing multiple indexing strategies, including idx_user_currency_type (user_id, currency_code, transaction_type) and idx_user_currency (user_id, currency_code), we found no measurable difference in query performance when using EXPLAIN ANALYZE. The query cost remained unchanged, and the optimizer continued to follow the same execution plan. After analyzing the plan, we observed that MySQL was already efficiently handling the joins using the primary keys on the User and CurrencyExchange tables, and the filter on transaction_type did not benefit from the composite index order. Additionally, the query likely operated on a modest dataset, where full table scans or nested loop joins were not bottlenecks. Therefore, neither index provided a performance advantage. This suggests that the default query execution path was already optimal given the data size and access patterns, and further indexing did not improve it. We concluded that no additional index is needed for this particular query at this scale, though indexing might show benefits in larger datasets.
 
 
+For the 2nd query.
+![image](https://github.com/user-attachments/assets/f9261513-7312-40cb-b93d-1934629de2f0)
+Adding a query on user transaction amount, there was little to no change. 
+![image](https://github.com/user-attachments/assets/87398ee9-8b6e-4907-985c-e65025dfa28b)
+Since the outer query filters and orders by t.amount, an index solely on amount may speed up the comparison and sorting.
+![image](https://github.com/user-attachments/assets/848c14c4-a4e9-4a4c-a24c-0ca149093c82)
+Although the composite index already starts with user_id, a dedicated index on user_id might be beneficial for other queries or for the join in the subquery. (Test its effect independently.)
+![image](https://github.com/user-attachments/assets/cec9979d-cbdd-47f4-9488-54d3e264a9b2)
+
 
 
 For the query finding users who never made transaction in given category.
