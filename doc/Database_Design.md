@@ -57,7 +57,7 @@ ORDER BY TotalExpense DESC
 LIMIT 15;
 
 
-This query gets transactions where amount is greater than the avg transaction amount for the same person.
+The next query gets transactions where amount is greater than the avg transaction amount for the same person.
 
 SELECT 
   t.transaction_id,
@@ -76,8 +76,9 @@ ORDER BY t.amount DESC
 LIMIT 15;
 ![image](https://github.com/user-attachments/assets/55f37f22-58bd-4ad9-8db4-ef67bfe238fa)
 
- Comparing Expense vs. Income Totals by User
-This query uses a UNION ALL to combine expense and income totals per user. Adjust the transaction types ('Normal' for expense and 'Income' for income) as needed.
+ *Comparing Expense vs. Income Totals by User*
+The next query uses a UNION ALL to combine expense and income totals per user. 
+
 (SELECT 
   u.user_id,
   u.name,
@@ -104,7 +105,9 @@ LIMIT 15;
 
 ![image](https://github.com/user-attachments/assets/62b49bc0-9bbe-406f-b252-8eb9ba0e35e9)
 
-This query finds users who have never made a transaction in a given category ("Food" in this case).
+The next query finds users who have never made a transaction in a given category ("Food" in this case).
+
+
 SELECT 
   u.user_id,
   u.name,
