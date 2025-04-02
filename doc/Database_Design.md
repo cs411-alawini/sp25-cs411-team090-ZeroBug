@@ -182,6 +182,8 @@ The default had a cost of 89.5
 ![Screenshot 2025-04-01 234154](https://github.com/user-attachments/assets/7efe866e-5a16-4adf-951d-a25e2d55c6b5)
 I created an index on the Category table for category_name, but the cost went up. This increase is likely because category_name has low cardinality. Many rows share the same value ('Food'), so the index lookup did not significantly reduce the number of rows scanned, and the extra index lookup overhead raised the cost.
 ![image](https://github.com/user-attachments/assets/96fd5bc7-5c02-46ef-b9aa-f11bfd2b919f)
+Next, I created a composite index on the Transaction table
+![image](https://github.com/user-attachments/assets/56bdc134-d31e-4214-afcd-414091e1dfeb)
 
 
 
