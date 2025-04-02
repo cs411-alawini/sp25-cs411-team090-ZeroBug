@@ -1,3 +1,8 @@
+![image](https://github.com/user-attachments/assets/7afee5ad-f807-4194-be61-9371fa17bb93)
+![image](https://github.com/user-attachments/assets/d70ae702-53f4-4772-88e8-51a08cacac94)
+
+
+
 ```sql
 CREATE TABLE User (
     user_id INT PRIMARY KEY,
