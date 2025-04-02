@@ -185,16 +185,6 @@ Although the composite index already starts with user_id, a dedicated index on u
 ![image](https://github.com/user-attachments/assets/cec9979d-cbdd-47f4-9488-54d3e264a9b2)
 
 
-
-For the query finding users who never made transaction in given category.
-The default had a cost of 89.5
-![Screenshot 2025-04-01 234154](https://github.com/user-attachments/assets/7efe866e-5a16-4adf-951d-a25e2d55c6b5)
-I created an index on the Category table for category_name, but the cost went up. This increase is likely because category_name has low cardinality. Many rows share the same value ('Food'), so the index lookup did not significantly reduce the number of rows scanned, and the extra index lookup overhead raised the cost.
-![image](https://github.com/user-attachments/assets/96fd5bc7-5c02-46ef-b9aa-f11bfd2b919f)
-Next, I created a composite index on the Transaction table
-![image](https://github.com/user-attachments/assets/56bdc134-d31e-4214-afcd-414091e1dfeb)
-
-
 <img width="1095" alt="Screenshot 2025-04-01 at 11 48 17 PM" src="https://github.com/user-attachments/assets/6d408d18-738b-4481-a821-1f91636eb9f7" />
 CREATE INDEX idx_transaction_category ON Transaction(category_id, user_id);
 
@@ -211,4 +201,14 @@ CREATE INDEX idx_category_name ON Category(category_name);
 - Indexing `category_name` allows MySQL to **quickly find 'Food' rows**, reducing join input size.
 
 We evaluated two indexing strategies to improve the performance of a query that filters users not present in a subquery involving a join between `Transaction` and `Category`, filtered on `category_name = 'Food'`. The first index we tested was `idx_transaction_category (category_id, user_id)` on the `Transaction` table, intended to optimize both the join condition and the `GROUP BY` operation. The second was `idx_category_name (category_name)` on the `Category`table to accelerate the filtering on `category_name`. However, after analyzing the `EXPLAIN ANALYZE` output for each configuration, we observed **no measurable difference in query performance**. The query planner continued to use a materialized subquery with deduplication and internal index optimizations, and neither index was utilized. We believe this is because the `Category` table is relatively small, making full table scans inexpensive, and `Category.category_id` is already a primary key, enabling an efficient join. Furthermore, the subquery’s result set was small and grouped by a low-cardinality field (`user_id`), so MySQL’s default plan remained optimal. Therefore, despite following best practices for indexing join and filter attributes, these indexes provided no benefit in this specific query due to **data size, existing primary keys, and internal optimizations already applied by MySQL**.
+
+
+
+For the query finding users who never made transaction in given category.
+The default had a cost of 89.5
+![Screenshot 2025-04-01 234154](https://github.com/user-attachments/assets/7efe866e-5a16-4adf-951d-a25e2d55c6b5)
+I created an index on the Category table for category_name, but the cost went up. This increase is likely because category_name has low cardinality. Many rows share the same value ('Food'), so the index lookup did not significantly reduce the number of rows scanned, and the extra index lookup overhead raised the cost.
+![image](https://github.com/user-attachments/assets/96fd5bc7-5c02-46ef-b9aa-f11bfd2b919f)
+Next, I created a composite index on the Transaction table
+![image](https://github.com/user-attachments/assets/56bdc134-d31e-4214-afcd-414091e1dfeb)
 
