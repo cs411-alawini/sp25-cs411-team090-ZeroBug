@@ -85,6 +85,7 @@ WHERE t.amount > (
     FROM Transaction t2
     WHERE t2.user_id = t.user_id
 )
+GROUP BY t.transaction_id
 ORDER BY t.amount DESC
 LIMIT 15;
 ```
@@ -130,6 +131,7 @@ WHERE u.user_id NOT IN (
     FROM Transaction t
     JOIN Category ca ON t.category_id = ca.category_id
     WHERE ca.category_name = 'Food'
+    GROUP BY t.user_id
 )
 LIMIT 15;
 ```
