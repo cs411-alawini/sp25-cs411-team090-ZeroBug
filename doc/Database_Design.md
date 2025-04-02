@@ -53,6 +53,7 @@ CREATE TABLE SavingsGoal (
 
 ## Total Expense by Category
 
+Users with the Highest Spending in Base Currency
 ```sql
 SELECT 
   u.name,
@@ -66,6 +67,7 @@ GROUP BY u.user_id
 ORDER BY total_spent DESC
 LIMIT 15;
 ```
+![image](https://github.com/user-attachments/assets/85fd0c6b-dd9f-44c2-b83f-8f5a02e35e59)
 
 
 The next query gets transactions where amount is greater than the avg transaction amount for the same person.
@@ -88,34 +90,32 @@ LIMIT 15;
 ```
 ![image](https://github.com/user-attachments/assets/55f37f22-58bd-4ad9-8db4-ef67bfe238fa)
 
- *Comparing Expense vs. Income Totals by User*
-The next query uses a UNION ALL to combine expense and income totals per user. 
+
+Returns how close each user is to the saving goal
 ```sql
-(SELECT 
-  u.user_id,
-  u.name,
-  'Expense' AS trans_type,
-  SUM(t.amount * cx.exchange_rate_to_base) AS Total
-FROM Transaction t
-JOIN User u ON t.user_id = u.user_id
-JOIN CurrencyExchange cx ON t.currency_code = cx.currency_code
-WHERE t.transaction_type = 'Normal'
-GROUP BY u.user_id, u.name)
-UNION ALL
-(SELECT 
-  u.user_id,
-  u.name,
-  'Income' AS trans_type,
-  SUM(t.amount * cx.exchange_rate_to_base) AS Total
-FROM Transaction t
-JOIN User u ON t.user_id = u.user_id
-JOIN CurrencyExchange cx ON t.currency_code = cx.currency_code
-WHERE t.transaction_type = 'Income'
-GROUP BY u.user_id, u.name)
-ORDER BY Total DESC
+SELECT 
+  u.user_id, 
+  u.name, 
+  sg.goal_name, 
+  sg.target_amount, 
+  sg.current_savings,
+  IFNULL(exp.TotalExpense, 0) AS TotalExpense,
+  (sg.target_amount - sg.current_savings - IFNULL(exp.TotalExpense, 0)) AS RemainingToGoal
+FROM User u
+JOIN SavingsGoal sg ON u.user_id = sg.user_id
+LEFT JOIN (
+  SELECT 
+    t.user_id,
+    SUM(t.amount * cx.exchange_rate_to_base) AS TotalExpense
+  FROM Transaction t
+  JOIN CurrencyExchange cx ON t.currency_code = cx.currency_code
+  WHERE t.transaction_type = 'Normal'
+  GROUP BY t.user_id
+) exp ON u.user_id = exp.user_id
+ORDER BY RemainingToGoal ASC
 LIMIT 15;
 ```
-![image](https://github.com/user-attachments/assets/62b49bc0-9bbe-406f-b252-8eb9ba0e35e9)
+![image](https://github.com/user-attachments/assets/1179e3d5-ff35-4a2b-8496-847c7a9cb2c8)
 
 The next query finds users who have never made a transaction in a given category ("Food" in this case).
 
