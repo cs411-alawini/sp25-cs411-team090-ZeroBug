@@ -1,3 +1,4 @@
+```sql
 CREATE TABLE User (
     user_id INT PRIMARY KEY,
     name VARCHAR(100),
@@ -5,19 +6,22 @@ CREATE TABLE User (
     password_hash VARCHAR(255),
     base_currency VARCHAR(3)
 );
-
+```
+```sql
 CREATE TABLE Category (
     category_id INT PRIMARY KEY,
     category_name VARCHAR(50) UNIQUE,
     category_type VARCHAR(10)
 );
-
+``
+```sql
 CREATE TABLE CurrencyExchange (
     currency_code VARCHAR(3) PRIMARY KEY,
     exchange_rate_to_base DECIMAL(10,4),
     last_updated TIMESTAMP
 );
-
+```
+```sql
 CREATE TABLE Transaction (
     transaction_id INT PRIMARY KEY,
     user_id INT,
@@ -31,7 +35,9 @@ CREATE TABLE Transaction (
     FOREIGN KEY (category_id) REFERENCES Category(category_id),
     FOREIGN KEY (currency_code) REFERENCES CurrencyExchange(currency_code)
 );
+```
 
+```sql
 CREATE TABLE SavingsGoal (
     goal_id INT PRIMARY KEY,
     user_id INT,
@@ -41,7 +47,7 @@ CREATE TABLE SavingsGoal (
     deadline DATE,
     FOREIGN KEY (user_id) REFERENCES User(user_id) ON DELETE CASCADE
 );
-
+```
 
 # Advanced Queries
 
@@ -49,14 +55,15 @@ CREATE TABLE SavingsGoal (
 
 ```sql
 SELECT 
-  ca.category_type,
-  SUM(t.amount * cx.exchange_rate_to_base) AS TotalExpense
+  u.name,
+  u.base_currency,
+  SUM(t.amount * cx.exchange_rate_to_base) AS total_spent
 FROM Transaction t
-INNER JOIN Category ca ON t.category_id = ca.category_id
-INNER JOIN CurrencyExchange cx ON t.currency_code = cx.currency_code
+JOIN User u ON t.user_id = u.user_id
+JOIN CurrencyExchange cx ON t.currency_code = cx.currency_code
 WHERE t.transaction_type = 'Normal'
-GROUP BY ca.category_type
-ORDER BY TotalExpense DESC
+GROUP BY u.user_id
+ORDER BY total_spent DESC
 LIMIT 15;
 ```
 
