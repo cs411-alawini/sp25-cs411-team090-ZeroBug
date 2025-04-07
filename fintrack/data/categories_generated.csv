@@ -1,0 +1,15 @@
+category_id,category_name,category_type
+1,misc_net,Expense
+2,grocery_pos,Expense
+3,entertainment,Expense
+4,gas_transport,Expense
+5,misc_pos,Expense
+6,grocery_net,Expense
+7,shopping_net,Expense
+8,shopping_pos,Expense
+9,food_dining,Expense
+10,personal_care,Expense
+11,health_fitness,Expense
+12,travel,Expense
+13,kids_pets,Expense
+14,home,Expense

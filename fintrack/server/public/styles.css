@@ -1,0 +1,246 @@
+:root {
+  --primary-color: #3a54fc;
+  --secondary-color: #f5f6fa;
+  --text-color: #333;
+  --light-text: #898989;
+  --success-color: #02c39a;
+  --danger-color: #ff6b6b;
+  --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  --sidebar-width: 240px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  color: var(--text-color);
+  background-color: #f4f7fe;
+}
+
+.container {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Sidebar Styles */
+.sidebar {
+  width: var(--sidebar-width);
+  background-color: white;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+  padding: 1.5rem;
+  position: fixed;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.logo img {
+  width: 32px;
+  margin-right: 10px;
+}
+
+.logo h2 {
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.nav-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  padding: 0.8rem 1rem;
+  text-decoration: none;
+  color: var(--light-text);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.nav-item.active, .nav-item:hover {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.nav-icon {
+  margin-right: 10px;
+  font-size: 1.2rem;
+}
+
+/* Main Content Styles */
+.main-content {
+  flex: 1;
+  margin-left: var(--sidebar-width);
+  padding: 1.5rem;
+}
+
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.search-bar {
+  display: flex;
+  background-color: white;
+  border-radius: 30px;
+  padding: 0.5rem 1rem;
+  box-shadow: var(--card-shadow);
+  width: 300px;
+}
+
+.search-bar input {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 0.9rem;
+}
+
+.search-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.user-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.settings-btn, .notifications-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.user-avatar img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* Dashboard Grid */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-gap: 1.5rem;
+}
+
+.dashboard-card {
+  background-color: white;
+  border-radius: 15px;
+  box-shadow: var(--card-shadow);
+  padding: 1.5rem;
+}
+
+.chart-container {
+  height: 300px;
+  margin-top: 1rem;
+}
+
+/* Chart Legend */
+.chart-legend {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.color-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.color-dot.deposit {
+  background-color: #02c39a;
+}
+
+.color-dot.withdraw {
+  background-color: var(--primary-color);
+}
+
+/* Transactions */
+.transaction-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.transaction-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.8rem 0;
+}
+
+.transaction-icon {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f6fa;
+}
+
+.transaction-icon.bank {
+  background-color: #ffe8cc;
+}
+
+.transaction-icon.paypal {
+  background-color: #d4e8ff;
+}
+
+.transaction-icon.person {
+  background-color: #d4ffea;
+}
+
+.transaction-info {
+  flex: 1;
+}
+
+.transaction-info h3 {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.transaction-info p {
+  font-size: 0.8rem;
+  color: var(--light-text);
+}
+
+.transaction-amount {
+  font-weight: 600;
+}
+
+.transaction-amount.positive {
+  color: var(--success-color);
+}
+
+.transaction-amount.negative {
+  color: var(--danger-color);
+} 
