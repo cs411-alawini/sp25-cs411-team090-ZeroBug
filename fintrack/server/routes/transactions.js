@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../db/database');
+const { pool: db } = require('../config/database');
 
 // Get all transactions for a user
 router.get('/user/:userId', async (req, res) => {

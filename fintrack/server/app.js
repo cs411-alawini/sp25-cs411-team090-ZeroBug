@@ -1,41 +1,51 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+const express = require('express');
+const bodyParser = require('body-parser');
+const mysql = require('mysql2/promise');
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+// Import route files
+const usersRouter = require('./routes/users');
+const transactionsRouter = require('./routes/transactions');
+const categoriesRouter = require('./routes/categories');
+const currencyRouter = require('./routes/currency');
+const savingsRouter = require('./routes/savings');
+const indexRouter = require('./routes/index');
+const { initializeDatabase } = require('./db/init');
 
-var app = express();
+const app = express();
+app.use(bodyParser.json());
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
+// Use the static middleware to serve files from public directory
+app.use(express.static('public'));
 
-app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+const dbConfig = {
+  host: '34.58.76.253',
+  user: 'yuhao',
+  database: 'fintrack_db'
+};
 
+// Initialize database on startup
+initializeDatabase().catch(err => {
+  console.error('Database initialization failed:', err);
+  process.exit(1);
+});
+
+// Use API routes
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/api/users', usersRouter);
+app.use('/api/transactions', transactionsRouter);
+app.use('/api/categories', categoriesRouter);
+app.use('/api/currency', currencyRouter);
+app.use('/api/savings', savingsRouter);
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  next(createError(404));
-});
+// Remove or comment out this route as it overrides the static file serving
+// app.get('/', function (req, res) {
+//   res.send({ message: 'Hello' });
+// });
 
-// error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+// Comment out or remove the direct listening
+// app.listen(3000, '0.0.0.0', function () {
+//   console.log('Node app is running on port 3000');
+// });
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
-});
-
+// Export the app for bin/www to use
 module.exports = app;

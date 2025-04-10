@@ -2,6 +2,20 @@ const express = require('express');
 const router = express.Router();
 const { pool: db } = require('../config/database');
 
+// Get all users
+router.get('/', async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      'SELECT user_id, name, email, base_currency FROM User'
+    );
+    
+    res.json(rows);
+  } catch (error) {
+    console.error('Error getting users:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // Get user profile
 router.get('/:userId', async (req, res) => {
   try {

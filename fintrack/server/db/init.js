@@ -41,7 +41,7 @@ async function initializeDatabase() {
   await connection.query(`
     CREATE TABLE IF NOT EXISTS CurrencyExchange (
       currency_code VARCHAR(3) PRIMARY KEY,
-      exchange_rate_to_usd DECIMAL(10,4),
+      exchange_rate DECIMAL(10,4),
       last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     )
   `);
@@ -98,7 +98,7 @@ async function initializeDatabase() {
 
   // Insert some default currencies
   await connection.query(`
-    INSERT IGNORE INTO CurrencyExchange (currency_code, exchange_rate_to_usd) VALUES 
+    INSERT IGNORE INTO CurrencyExchange (currency_code, exchange_rate_to_base) VALUES 
     ('USD', 1.0),
     ('EUR', 0.91),
     ('GBP', 0.78),
