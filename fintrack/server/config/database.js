@@ -9,5 +9,8 @@ const dbConfig = {
 // Create a pool instead of a single connection for better performance
 const pool = mysql.createPool(dbConfig);
 
-// Export the pool to be used by other modules
-module.exports = pool;
+// Export both the pool and the config
+module.exports = {
+  pool,
+  dbConfig
+};

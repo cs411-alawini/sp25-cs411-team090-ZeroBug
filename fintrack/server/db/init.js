@@ -1,5 +1,5 @@
 const mysql = require('mysql2/promise');
-const dbConfig = require('./database').dbConfig;
+const dbConfig = require('../config/database').dbConfig;
 
 async function initializeDatabase() {
   // Connect without specifying a database first
