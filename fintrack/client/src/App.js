@@ -1,37 +1,47 @@
 import React from 'react';
-import { BrowserRouter as Router } from 'react-router-dom';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
-import Dashboard from './components/dashboard/Dashboard';
-import './App.css';
-import { Experimental_CssVarsProvider as CssVarsProvider } from '@mui/material/styles';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
+import Dashboard from './components/dashboard';
 
-// Create a theme instance
+// Create a custom theme
 const theme = createTheme({
   palette: {
-    mode: 'light',
     primary: {
-      main: '#1976d2',
+      main: '#3461FF',
     },
     secondary: {
-      main: '#dc004e',
+      main: '#36CFCF',
     },
     background: {
       default: '#F8FAFF',
+    },
+  },
+  typography: {
+    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: 12,
+          textTransform: 'none',
+        },
+      },
     },
   },
 });
 
 function App() {
   return (
-    <CssVarsProvider theme={theme}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Router>
-          <Dashboard />
-        </Router>
-      </ThemeProvider>
-    </CssVarsProvider>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Router>
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          {/* Add more routes as needed */}
+        </Routes>
+      </Router>
+    </ThemeProvider>
   );
 }
 
