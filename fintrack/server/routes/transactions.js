@@ -201,28 +201,24 @@ router.get('/summary/:userId', async (req, res) => {
       queryParams.push(dateFilter);
     }
     
-    // Get total income and expense
+    // Simplified query without currency exchange
     const [summary] = await db.query(
       `SELECT 
-        SUM(CASE WHEN t.transaction_type = 'Income' THEN 
-          t.amount * (SELECT exchange_rate_to_usd FROM CurrencyExchange WHERE currency_code = t.currency_code) 
-          ELSE 0 END) as total_income,
-        SUM(CASE WHEN t.transaction_type = 'Expense' THEN 
-          t.amount * (SELECT exchange_rate_to_usd FROM CurrencyExchange WHERE currency_code = t.currency_code) 
-          ELSE 0 END) as total_expense,
+        0 as total_income,
+        SUM(t.amount) as total_expense,
         (SELECT base_currency FROM User WHERE user_id = ?) as base_currency
       FROM Transaction t
       WHERE t.user_id = ? ${timeFilter}`,
       [userId, ...queryParams]
     );
     
-    // Get spending by category
+    // Simplified query for categories
     const [categories] = await db.query(
       `SELECT 
         c.category_id, 
         c.category_name, 
         c.category_type,
-        SUM(t.amount * (SELECT exchange_rate_to_usd FROM CurrencyExchange WHERE currency_code = t.currency_code)) as total_amount
+        SUM(t.amount) as total_amount
       FROM Transaction t
       JOIN Category c ON t.category_id = c.category_id
       WHERE t.user_id = ? ${timeFilter}
