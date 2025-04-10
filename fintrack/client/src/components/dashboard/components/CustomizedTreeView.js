@@ -1,6 +1,5 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
-import clsx from 'clsx';
 import { animated, useSpring } from '@react-spring/web';
 
 import Box from '@mui/material/Box';
@@ -8,17 +7,10 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Collapse from '@mui/material/Collapse';
 import Typography from '@mui/material/Typography';
-import { RichTreeView } from '@mui/x-tree-view/RichTreeView';
-import { unstable_useTreeItem2 as useTreeItem2 } from '@mui/x-tree-view/useTreeItem2';
-import {
-  TreeItem2Content,
-  TreeItem2IconContainer,
-  TreeItem2Label,
-  TreeItem2Root,
-} from '@mui/x-tree-view/TreeItem2';
-import { TreeItem2Icon } from '@mui/x-tree-view/TreeItem2Icon';
-import { TreeItem2Provider } from '@mui/x-tree-view/TreeItem2Provider';
-
+import TreeView from '@mui/lab/TreeView';
+import TreeItem from '@mui/lab/TreeItem';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { useTheme } from '@mui/material/styles';
 
 const ITEMS = [
@@ -91,13 +83,10 @@ function TransitionComponent(props) {
 }
 
 TransitionComponent.propTypes = {
-  /**
-   * Show the component; triggers the enter or exit states
-   */
   in: PropTypes.bool,
 };
 
-function CustomLabel({ color, expandable, children, ...other }) {
+function CustomLabel({ color, children }) {
   const theme = useTheme();
   const colors = {
     blue: (theme.vars || theme).palette.primary.main,
@@ -106,94 +95,39 @@ function CustomLabel({ color, expandable, children, ...other }) {
 
   const iconColor = color ? colors[color] : null;
   return (
-    <TreeItem2Label {...other} sx={{ display: 'flex', alignItems: 'center' }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', p: 0.5, pr: 0 }}>
       {iconColor && <DotIcon color={iconColor} />}
-      <Typography
-        className="labelText"
-        variant="body2"
-        sx={{ color: 'text.primary' }}
-      >
+      <Typography variant="body2" sx={{ color: 'text.primary' }}>
         {children}
       </Typography>
-    </TreeItem2Label>
+    </Box>
   );
 }
 
 CustomLabel.propTypes = {
   children: PropTypes.node,
   color: PropTypes.oneOf(['blue', 'green']),
-  expandable: PropTypes.bool,
 };
 
-const CustomTreeItem = React.forwardRef(function CustomTreeItem(props, ref) {
-  const { id, itemId, label, disabled, children, ...other } = props;
+const StyledTreeItem = React.forwardRef(function StyledTreeItem(props, ref) {
+  const { label, color, children, ...other } = props;
 
-  const {
-    getRootProps,
-    getContentProps,
-    getIconContainerProps,
-    getLabelProps,
-    getGroupTransitionProps,
-    status,
-    publicAPI,
-  } = useTreeItem2({ id, itemId, children, label, disabled, rootRef: ref });
-
-  const item = publicAPI.getItem(itemId);
-  const color = item?.color;
   return (
-    <TreeItem2Provider itemId={itemId}>
-      <TreeItem2Root {...getRootProps(other)}>
-        <TreeItem2Content
-          {...getContentProps({
-            className: clsx('content', {
-              expanded: status.expanded,
-              selected: status.selected,
-              focused: status.focused,
-              disabled: status.disabled,
-            }),
-          })}
-        >
-          {status.expandable && (
-            <TreeItem2IconContainer {...getIconContainerProps()}>
-              <TreeItem2Icon status={status} />
-            </TreeItem2IconContainer>
-          )}
-
-          <CustomLabel {...getLabelProps({ color })} />
-        </TreeItem2Content>
-        {children && (
-          <TransitionComponent
-            {...getGroupTransitionProps({ className: 'groupTransition' })}
-          />
-        )}
-      </TreeItem2Root>
-    </TreeItem2Provider>
+    <TreeItem
+      ref={ref}
+      TransitionComponent={TransitionComponent}
+      label={<CustomLabel color={color}>{label}</CustomLabel>}
+      {...other}
+    >
+      {children}
+    </TreeItem>
   );
 });
 
-CustomTreeItem.propTypes = {
-  /**
-   * The content of the component.
-   */
+StyledTreeItem.propTypes = {
   children: PropTypes.node,
-  /**
-   * If `true`, the item is disabled.
-   * @default false
-   */
-  disabled: PropTypes.bool,
-  /**
-   * The id attribute of the item. If not provided, it will be generated.
-   */
-  id: PropTypes.string,
-  /**
-   * The id of the item.
-   * Must be unique.
-   */
-  itemId: PropTypes.string.isRequired,
-  /**
-   * The label of the item.
-   */
-  label: PropTypes.node,
+  color: PropTypes.oneOf(['blue', 'green']),
+  label: PropTypes.string.isRequired,
 };
 
 export default function CustomizedTreeView() {
@@ -203,24 +137,53 @@ export default function CustomizedTreeView() {
       sx={{ display: 'flex', flexDirection: 'column', gap: '8px', flexGrow: 1 }}
     >
       <CardContent>
-        <Typography component="h2" variant="subtitle2">
+        <Typography component="h2" variant="subtitle2" gutterBottom>
           Product tree
         </Typography>
-        <RichTreeView
-          items={ITEMS}
+        <TreeView
           aria-label="pages"
-          multiSelect
-          defaultExpandedItems={['1', '1.1']}
-          defaultSelectedItems={['1.1', '1.1.1']}
+          defaultExpanded={['1', '1.4', '2', '2.2']}
+          defaultCollapseIcon={<ExpandMoreIcon />}
+          defaultExpandIcon={<ChevronRightIcon />}
           sx={{
-            m: '0 -8px',
-            pb: '8px',
-            height: 'fit-content',
+            height: 'auto',
             flexGrow: 1,
+            maxWidth: 400,
             overflowY: 'auto',
+            '& .MuiTreeItem-root': {
+              '& .MuiTreeItem-content': {
+                padding: '4px 8px',
+              },
+            },
           }}
-          slots={{ item: CustomTreeItem }}
-        />
+        >
+          {ITEMS.map((item) => (
+            <StyledTreeItem
+              key={item.id}
+              nodeId={item.id}
+              label={item.label}
+              color={item.color}
+            >
+              {item.children?.map((child) => (
+                <StyledTreeItem
+                  key={child.id}
+                  nodeId={child.id}
+                  label={child.label}
+                  color={child.color}
+                >
+                  {child.children?.map((grandChild) => (
+                    <StyledTreeItem
+                      key={grandChild.id}
+                      nodeId={grandChild.id}
+                      label={grandChild.label}
+                      color={grandChild.color}
+                    />
+                  ))}
+                </StyledTreeItem>
+              ))}
+            </StyledTreeItem>
+          ))}
+        </TreeView>
       </CardContent>
     </Card>
   );

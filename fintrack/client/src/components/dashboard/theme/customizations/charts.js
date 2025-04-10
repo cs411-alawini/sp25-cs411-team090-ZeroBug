@@ -1,4 +1,4 @@
-import { axisClasses, legendClasses, chartsGridClasses } from '@mui/x-charts';
+import { axisClasses } from '@mui/x-charts';
 
 import { gray } from '../../../shared-theme/themePrimitives';
 
@@ -48,7 +48,7 @@ export const chartsCustomizations = {
   MuiChartsLegend: {
     styleOverrides: {
       root: {
-        [`& .${legendClasses.mark}`]: {
+        [`& .${axisClasses.mark}`]: {
           ry: 6,
         },
       },
@@ -57,13 +57,13 @@ export const chartsCustomizations = {
   MuiChartsGrid: {
     styleOverrides: {
       root: ({ theme }) => ({
-        [`& .${chartsGridClasses.line}`]: {
+        '& .MuiGrid-line': {
           stroke: gray[200],
           strokeDasharray: '4 2',
           strokeWidth: 0.8,
         },
         ...theme.applyStyles('dark', {
-          [`& .${chartsGridClasses.line}`]: {
+          '& .MuiGrid-line': {
             stroke: gray[700],
             strokeDasharray: '4 2',
             strokeWidth: 0.8,
