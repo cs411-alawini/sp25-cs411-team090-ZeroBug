@@ -40,12 +40,8 @@ import BarChartIcon from '@mui/icons-material/BarChart';
 import SettingsIcon from '@mui/icons-material/Settings';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import LogoutIcon from '@mui/icons-material/Logout';
-import { 
-  PieChart, Pie, Cell, 
-  ResponsiveContainer,
-  Tooltip,
-  BarChart, Bar, XAxis, YAxis, CartesianGrid
-} from 'recharts';
+import { DataGrid } from '@mui/x-data-grid';
+import { SyncedExpenseCharts } from './charts/SyncedExpenseCharts';
 import axios from 'axios';
 
 // Create a basic theme instead of using AppTheme
@@ -179,11 +175,143 @@ const fetchTransactionSummary = async (userId) => {
   }
 };
 
+// Transaction DataGrid component
+function TransactionsDataGrid({ transactions }) {
+  // Define columns for DataGrid
+  const columns = [
+    { 
+      field: 'id', 
+      headerName: 'ID', 
+      width: 70 
+    },
+    { 
+      field: 'date', 
+      headerName: 'Date', 
+      width: 130,
+      renderCell: (params) => (
+        <Typography variant="body2" component="div">
+          {params.value}
+        </Typography>
+      ),
+    },
+    { 
+      field: 'type', 
+      headerName: 'Description', 
+      width: 200,
+      flex: 1,
+    },
+    { 
+      field: 'category', 
+      headerName: 'Category', 
+      width: 130,
+      renderCell: (params) => (
+        <Chip
+          label={params.value}
+          size="small"
+          sx={{ backgroundColor: '#EEF2FF', color: '#3461FF' }}
+        />
+      ),
+    },
+    { 
+      field: 'payment_method', 
+      headerName: 'Payment Method', 
+      width: 150,
+      renderCell: (params) => (
+        params.value ? (
+          <Chip
+            icon={getPaymentMethodIcon(params.value)}
+            label={params.value}
+            size="small"
+            sx={{ backgroundColor: '#F8FAFF' }}
+          />
+        ) : null
+      ),
+    },
+    { 
+      field: 'amount', 
+      headerName: 'Amount', 
+      width: 120,
+      type: 'number',
+      renderCell: (params) => (
+        <Typography 
+          variant="body2" 
+          component="div"
+          sx={{ 
+            color: params.value < 0 ? '#FF3B3B' : '#4CAF50',
+            fontWeight: 600 
+          }}
+        >
+          {params.value < 0 ? '-' : '+'}${Math.abs(params.value).toFixed(2)}
+        </Typography>
+      ),
+    },
+    { 
+      field: 'currency_code', 
+      headerName: 'Currency', 
+      width: 100,
+      renderCell: (params) => (
+        <Chip
+          label={params.value}
+          size="small"
+          sx={{ backgroundColor: '#F1F5F9' }}
+        />
+      ),
+    },
+  ];
+
+  // Function to get payment method icon
+  const getPaymentMethodIcon = (method) => {
+    switch(method?.toLowerCase()) {
+      case 'credit card':
+        return <CreditCardIcon fontSize="small" />;
+      case 'bank transfer':
+        return <AccountBalanceIcon fontSize="small" />;
+      default:
+        return <PaymentIcon fontSize="small" />;
+    }
+  };
+
+  return (
+    <Box sx={{ height: 400, width: '100%' }}>
+      <DataGrid
+        rows={transactions}
+        columns={columns}
+        rowHeight={48}
+        checkboxSelection
+        disableRowSelectionOnClick
+        initialState={{
+          pagination: {
+            paginationModel: { pageSize: 10 },
+          },
+          sorting: {
+            sortModel: [{ field: 'date', sort: 'desc' }],
+          },
+        }}
+        pageSizeOptions={[5, 10, 25]}
+        sx={{
+          border: 'none',
+          '& .MuiDataGrid-cell': {
+            borderBottom: '1px solid #F1F5F9',
+          },
+          '& .MuiDataGrid-columnHeaders': {
+            backgroundColor: '#F8FAFF',
+            borderBottom: '1px solid #E2E8F0',
+          },
+          '& .MuiDataGrid-footerContainer': {
+            borderTop: '1px solid #E2E8F0',
+          },
+        }}
+      />
+    </Box>
+  );
+}
+
 // The main content component
 function FinancialContent() {
   // State variables for data
-  const userId = 258; // Using fixed user ID
+  const userId = 158; // Using fixed user ID
   const [isLoading, setIsLoading] = useState(true);
+  const [allTransactions, setAllTransactions] = useState([]);
   const [recentTransactions, setRecentTransactions] = useState([]);
   const [categorySummary, setCategorySummary] = useState([]);
   const [paymentMethodData, setPaymentMethodData] = useState([]);
@@ -192,6 +320,7 @@ function FinancialContent() {
   const [totalIncome, setTotalIncome] = useState(0);
   const [totalExpense, setTotalExpense] = useState(0);
   const [lastActivity, setLastActivity] = useState(null);
+  const [highlightedItem, setHighlightedItem] = useState(null);
 
   // Fetch data when component mounts
   useEffect(() => {
@@ -201,8 +330,8 @@ function FinancialContent() {
         // Fetch transactions
         const transactions = await fetchUserTransactions(userId);
         
-        // Process recent transactions
-        const recent = transactions.slice(0, 10).map(t => ({
+        // Process for grid display
+        const transactionsForGrid = transactions.map(t => ({
           id: t.transaction_id,
           type: t.description || t.transaction_type,
           date: new Date(t.transaction_date).toLocaleDateString('en-US', {
@@ -215,7 +344,9 @@ function FinancialContent() {
           payment_method: t.payment_method,
           currency_code: t.currency_code
         }));
-        setRecentTransactions(recent);
+        
+        setAllTransactions(transactionsForGrid);
+        setRecentTransactions(transactionsForGrid.slice(0, 10));
         
         // Get last activity
         if (transactions.length > 0) {
@@ -283,8 +414,9 @@ function FinancialContent() {
         const categoryData = categories
           .filter(cat => cat.category_type === 'Expense')
           .map((cat, index) => ({
-            name: cat.category_name,
+            id: index,
             value: Number(cat.total_amount) || 0,
+            label: cat.category_name,
             color: colors[index % colors.length]
           }));
           
@@ -316,6 +448,15 @@ function FinancialContent() {
       default:
         return <PaymentIcon />;
     }
+  };
+
+  // Currency formatter for pie chart
+  const valueFormatter = (value) => {
+    // Check if value is a number before using toFixed
+    if (typeof value === 'number') {
+      return `$${value.toFixed(2)}`;
+    }
+    return `$${value}`;
   };
 
   if (isLoading) {
@@ -377,79 +518,7 @@ function FinancialContent() {
           </StyledPaper>
         </Grid>
 
-        {/* Expense By Category */}
-        <Grid item xs={12} md={6}>
-          <StyledPaper>
-            <Typography variant="h6" gutterBottom sx={{ color: '#1E293B', fontWeight: 600 }}>
-              Expense Categories
-            </Typography>
-            <Box sx={{ height: 300, mt: 2 }}>
-              {categorySummary.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={categorySummary}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={80}
-                      paddingAngle={5}
-                      dataKey="value"
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                    >
-                      {categorySummary.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
-                  </PieChart>
-                </ResponsiveContainer>
-              ) : (
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-                  <Typography variant="body1" sx={{ color: '#64748B' }}>
-                    No category data available
-                  </Typography>
-                </Box>
-              )}
-            </Box>
-          </StyledPaper>
-        </Grid>
-      </Grid>
-
-      {/* Payment Method Analysis and Currency Distribution */}
-      <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
-        Financial Details
-      </Typography>
-      <Grid container spacing={2} columns={12} sx={{ mb: 3 }}>
-        {/* Payment Method Analysis */}
-        <Grid item xs={12} md={6}>
-          <StyledPaper>
-            <Typography variant="h6" gutterBottom sx={{ color: '#1E293B', fontWeight: 600 }}>
-              Payment Method Analysis
-            </Typography>
-            {paymentMethodData.length > 0 ? (
-              <Box sx={{ height: 250, mt: 2 }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={paymentMethodData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
-                    <Bar dataKey="value" fill="#3461FF" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </Box>
-            ) : (
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 200 }}>
-                <Typography variant="body1" sx={{ color: '#64748B' }}>
-                  No payment method data available
-                </Typography>
-              </Box>
-            )}
-          </StyledPaper>
-        </Grid>
-
-        {/* Currency Distribution */}
+        {/* Currency Distribution - moved here */}
         <Grid item xs={12} md={6}>
           <StyledPaper>
             <Typography variant="h6" gutterBottom sx={{ color: '#1E293B', fontWeight: 600 }}>
@@ -489,13 +558,53 @@ function FinancialContent() {
         </Grid>
       </Grid>
 
-      {/* Top Spending Categories and Recent Transactions */}
+      {/* Financial Details */}
+      <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
+        Financial Details
+      </Typography>
+      <Grid container spacing={2} columns={12} sx={{ mb: 3 }}>
+        {/* Expense Categories - moved here */}
+        <Grid item xs={12} md={12}>
+          <StyledPaper>
+            <Typography variant="h6" gutterBottom sx={{ color: '#1E293B', fontWeight: 600 }}>
+              Expense Categories
+            </Typography>
+            <Box sx={{ height: 300, mt: 2 }}>
+            <SyncedExpenseCharts pieData={categorySummary} barData={categorySummary} />
+            </Box>
+          </StyledPaper>
+        </Grid>
+      </Grid>
+
+      {/* Transactions DataGrid */}
       <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
         Transactions
       </Typography>
+      <Grid container spacing={2} columns={12} sx={{ mb: 3 }}>
+        <Grid item xs={12}>
+          <StyledPaper>
+            <Typography variant="h6" gutterBottom sx={{ color: '#1E293B', fontWeight: 600 }}>
+              All Transactions
+            </Typography>
+            <Box sx={{ mt: 2 }}>
+              {allTransactions.length > 0 ? (
+                <TransactionsDataGrid transactions={allTransactions} />
+              ) : (
+                <Typography variant="body1" align="center" sx={{ py: 2, color: '#64748B' }}>
+                  No transactions available
+                </Typography>
+              )}
+            </Box>
+          </StyledPaper>
+        </Grid>
+      </Grid>
+
+      {/* Top Spending Categories */}
+      <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
+        Top Categories
+      </Typography>
       <Grid container spacing={2} columns={12}>
-        {/* Top Spending Categories */}
-        <Grid item xs={12} md={5}>
+        <Grid item xs={12}>
           <StyledPaper>
             <Typography variant="h6" gutterBottom sx={{ color: '#1E293B', fontWeight: 600 }}>
               Top Spending Categories
@@ -512,7 +621,7 @@ function FinancialContent() {
                   </TableHead>
                   <TableBody>
                     {topCategories.map((category) => (
-                      <TableRow key={category.name}>
+                      <TableRow key={category.label}>
                         <TableCell>
                           <Box sx={{ display: 'flex', alignItems: 'center' }}>
                             <Box 
@@ -524,7 +633,7 @@ function FinancialContent() {
                                 mr: 1 
                               }} 
                             />
-                            {category.name}
+                            {category.label}
                           </Box>
                         </TableCell>
                         <TableCell align="right">${category.value.toFixed(2)}</TableCell>
@@ -541,79 +650,6 @@ function FinancialContent() {
                 No category data available
               </Typography>
             )}
-          </StyledPaper>
-        </Grid>
-
-        {/* Recent Transactions */}
-        <Grid item xs={12} md={7}>
-          <StyledPaper>
-            <Typography variant="h6" gutterBottom sx={{ color: '#1E293B', fontWeight: 600 }}>
-              Recent Transactions
-            </Typography>
-            <Box sx={{ mt: 2 }}>
-              {recentTransactions.length > 0 ? (
-                <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
-                  {recentTransactions.slice(0, 5).map((transaction) => (
-                    <React.Fragment key={transaction.id}>
-                      <ListItem alignItems="flex-start">
-                        <ListItemAvatar>
-                          <Avatar 
-                            sx={{ 
-                              bgcolor: transaction.amount < 0 ? '#FFE2E5' : '#E8F5E9',
-                              color: transaction.amount < 0 ? '#FF3B3B' : '#4CAF50',
-                            }}
-                          >
-                            {transaction.amount < 0 ? '-' : '+'}
-                          </Avatar>
-                        </ListItemAvatar>
-                        <ListItemText
-                          primary={
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                              <Typography component="span" variant="subtitle1" color="#1E293B">
-                                {transaction.type}
-                              </Typography>
-                              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                {transaction.payment_method && (
-                                  <Chip 
-                                    icon={getPaymentIcon(transaction.payment_method)} 
-                                    label={transaction.payment_method}
-                                    size="small"
-                                    sx={{ mr: 1, fontSize: '0.7rem' }}
-                                  />
-                                )}
-                                <Typography 
-                                  component="span" 
-                                  variant="subtitle1"
-                                  sx={{ 
-                                    color: transaction.amount < 0 ? '#FF3B3B' : '#4CAF50',
-                                    fontWeight: 600 
-                                  }}
-                                >
-                                  {transaction.amount < 0 ? '-' : '+'}${Math.abs(transaction.amount).toFixed(2)}
-                                  {transaction.currency_code !== 'USD' && ` ${transaction.currency_code}`}
-                                </Typography>
-                              </Box>
-                            </Box>
-                          }
-                          secondary={
-                            <React.Fragment>
-                              <Typography component="span" variant="body2" color="#64748B">
-                                {transaction.date} • {transaction.category}
-                              </Typography>
-                            </React.Fragment>
-                          }
-                        />
-                      </ListItem>
-                      <Divider variant="inset" component="li" />
-                    </React.Fragment>
-                  ))}
-                </List>
-              ) : (
-                <Typography variant="body1" align="center" sx={{ py: 2, color: '#64748B' }}>
-                  No recent transactions
-                </Typography>
-              )}
-            </Box>
           </StyledPaper>
         </Grid>
       </Grid>

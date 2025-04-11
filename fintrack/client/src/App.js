@@ -1,7 +1,9 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 import Dashboard from './components/dashboard';
+import Login from './components/sign-in/SignIn';
+import Signup from './components/sign-up/SignUp';
 
 // Create a custom theme
 const theme = createTheme({
@@ -37,6 +39,8 @@ function App() {
       <CssBaseline />
       <Router>
         <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
           <Route path="/" element={<Dashboard />} />
           {/* Add more routes as needed */}
         </Routes>
