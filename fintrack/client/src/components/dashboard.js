@@ -1,35 +1,45 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Box, 
-  Grid, 
-  Paper, 
-  Typography, 
-  InputBase,
-  IconButton,
-  Avatar,
-  styled,
-  useTheme,
-  useMediaQuery,
-  CircularProgress,
-  List, 
-  ListItem,
-  ListItemText,
-  ListItemAvatar,
-  Divider,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Chip
-} from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import SettingsIcon from '@mui/icons-material/Settings';
-import NotificationsIcon from '@mui/icons-material/Notifications';
+import * as React from 'react';
+import { useState, useEffect } from 'react';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import Grid from '@mui/material/Grid';
+import Typography from '@mui/material/Typography';
+import Paper from '@mui/material/Paper';
+import CircularProgress from '@mui/material/CircularProgress';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Chip from '@mui/material/Chip';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
+import ListItemAvatar from '@mui/material/ListItemAvatar';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import Divider from '@mui/material/Divider';
+import Avatar from '@mui/material/Avatar';
+import { styled } from '@mui/material/styles';
+import Drawer from '@mui/material/Drawer';
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import IconButton from '@mui/material/IconButton';
+import Container from '@mui/material/Container';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import PaymentIcon from '@mui/icons-material/Payment';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import CreditCardIcon from '@mui/icons-material/CreditCard';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import MenuIcon from '@mui/icons-material/Menu';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import BarChartIcon from '@mui/icons-material/BarChart';
+import SettingsIcon from '@mui/icons-material/Settings';
+import ReceiptIcon from '@mui/icons-material/Receipt';
+import LogoutIcon from '@mui/icons-material/Logout';
 import { 
   PieChart, Pie, Cell, 
   ResponsiveContainer,
@@ -38,50 +48,116 @@ import {
 } from 'recharts';
 import axios from 'axios';
 
+// Create a basic theme instead of using AppTheme
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#3461FF',
+    },
+    secondary: {
+      main: '#4CAF50',
+    },
+    background: {
+      default: '#F8FAFF',
+      paper: '#FFFFFF'
+    }
+  },
+  typography: {
+    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+  },
+});
+
+const drawerWidth = 240;
+
 const StyledPaper = styled(Paper)(({ theme }) => ({
   backgroundColor: '#FFFFFF',
   borderRadius: 16,
   padding: theme.spacing(2),
   height: '100%',
-  boxShadow: 'none',
+  boxShadow: '0px 2px 6px rgba(0, 0, 0, 0.05)',
   [theme.breakpoints.up('md')]: {
     padding: theme.spacing(3),
   },
 }));
 
-const SearchBar = styled('div')(({ theme }) => ({
-  position: 'relative',
-  backgroundColor: '#F8FAFF',
-  borderRadius: 12,
-  width: 300,
-  display: 'flex',
-  alignItems: 'center',
-}));
+// Sidebar component - now always temporary for hamburger style
+function Sidebar({ open, onClose }) {
+  const menuItems = [
+    { text: 'Dashboard', icon: <DashboardIcon />, active: true },
+    { text: 'Transactions', icon: <ReceiptIcon /> },
+    { text: 'Accounts', icon: <AccountBalanceWalletIcon /> },
+    { text: 'Analytics', icon: <BarChartIcon /> },
+    { text: 'Settings', icon: <SettingsIcon /> },
+  ];
 
-const TransactionItem = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  padding: theme.spacing(2),
-  borderRadius: 12,
-  backgroundColor: '#FFFFFF',
-  marginBottom: theme.spacing(2),
-  '&:hover': {
-    backgroundColor: '#F8FAFF',
-  },
-}));
+  return (
+    <Drawer
+      variant="temporary"
+      open={open}
+      onClose={onClose}
+      ModalProps={{
+        keepMounted: true, // Better mobile performance
+      }}
+      sx={{
+        display: { xs: 'block' },
+        '& .MuiDrawer-paper': {
+          width: drawerWidth,
+          boxSizing: 'border-box',
+          backgroundColor: '#FFFFFF',
+          borderRight: 'none',
+          boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.05)',
+        },
+      }}
+    >
+      <Box sx={{ p: 2 }}>
+        <Typography variant="h6" sx={{ fontWeight: 600, color: '#1E293B' }}>
+          FinTrack
+        </Typography>
+      </Box>
+      <Divider />
+      <List sx={{ mt: 2 }}>
+        {menuItems.map((item) => (
+          <ListItem key={item.text} disablePadding>
+            <ListItemButton
+              sx={{
+                borderRadius: '10px',
+                mx: 1,
+                mb: 0.5,
+                backgroundColor: item.active ? '#EEF2FF' : 'transparent',
+                color: item.active ? '#3461FF' : '#64748B',
+                '&:hover': {
+                  backgroundColor: '#F8FAFF',
+                },
+              }}
+            >
+              <ListItemIcon sx={{ color: item.active ? '#3461FF' : '#64748B' }}>
+                {item.icon}
+              </ListItemIcon>
+              <ListItemText primary={item.text} />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
+      <Box sx={{ mt: 'auto', mb: 2, mx: 2 }}>
+        <ListItemButton
+          sx={{
+            borderRadius: '10px',
+            color: '#64748B',
+            '&:hover': {
+              backgroundColor: '#F8FAFF',
+            },
+          }}
+        >
+          <ListItemIcon sx={{ color: '#64748B' }}>
+            <LogoutIcon />
+          </ListItemIcon>
+          <ListItemText primary="Logout" />
+        </ListItemButton>
+      </Box>
+    </Drawer>
+  );
+}
 
-const DashboardContainer = styled(Box)(({ theme }) => ({
-    flexGrow: 1,
-    padding: theme.spacing(2),
-    backgroundColor: '#F8FAFF',
-    minHeight: '100vh',
-    maxWidth: '1280px',
-    margin: '0 auto',
-    [theme.breakpoints.up('md')]: {
-      padding: theme.spacing(3),
-    },
-  }));
-  
 // API service functions
 const fetchUserTransactions = async (userId) => {
   try {
@@ -103,12 +179,10 @@ const fetchTransactionSummary = async (userId) => {
   }
 };
 
-function Dashboard() {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  
+// The main content component
+function FinancialContent() {
   // State variables for data
-  const userId = 158; // Using fixed user ID 158
+  const userId = 258; // Using fixed user ID
   const [isLoading, setIsLoading] = useState(true);
   const [recentTransactions, setRecentTransactions] = useState([]);
   const [categorySummary, setCategorySummary] = useState([]);
@@ -246,62 +320,19 @@ function Dashboard() {
 
   if (isLoading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
         <CircularProgress />
       </Box>
     );
   }
 
   return (
-    <DashboardContainer>
-      {/* Header */}
-      <Box sx={{ 
-        mb: 3,
-        display: 'flex',
-        flexDirection: isMobile ? 'column' : 'row',
-        gap: 2,
-        alignItems: isMobile ? 'flex-start' : 'center',
-        justifyContent: 'space-between'
-      }}>
-        <Typography variant="h5" sx={{ fontWeight: 600, color: '#1E293B' }}>
-          Financial Overview
-        </Typography>
-        <Box sx={{ 
-          display: 'flex', 
-          gap: 2, 
-          alignItems: 'center',
-          width: isMobile ? '100%' : 'auto'
-        }}>
-          <SearchBar sx={{ 
-            flex: isMobile ? 1 : 'none',
-            maxWidth: isMobile ? '100%' : 300
-          }}>
-            <IconButton sx={{ p: 1 }}>
-              <SearchIcon sx={{ color: '#94A3B8' }} />
-            </IconButton>
-            <InputBase
-              placeholder="Search for something"
-              sx={{ ml: 1, flex: 1, color: '#94A3B8' }}
-            />
-          </SearchBar>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <IconButton size="small">
-              <SettingsIcon sx={{ color: '#94A3B8' }} />
-            </IconButton>
-            <IconButton size="small">
-              <NotificationsIcon sx={{ color: '#94A3B8' }} />
-            </IconButton>
-            <Avatar 
-              alt="UI" 
-              src="/path/to/illinois-logo.png"
-              sx={{ width: 32, height: 32 }}
-            />
-          </Box>
-        </Box>
-      </Box>
-  
+    <Box sx={{ width: '100%' }}>
       {/* Summary Cards */}
-      <Grid container spacing={3} sx={{ mb: 3 }}>
+      <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
+        Financial Overview
+      </Typography>
+      <Grid container spacing={2} columns={12} sx={{ mb: 3 }}>
         <Grid item xs={12} md={6}>
           <StyledPaper>
             <Typography variant="h6" gutterBottom sx={{ color: '#1E293B', fontWeight: 600 }}>
@@ -345,7 +376,7 @@ function Dashboard() {
             </Box>
           </StyledPaper>
         </Grid>
-  
+
         {/* Expense By Category */}
         <Grid item xs={12} md={6}>
           <StyledPaper>
@@ -377,16 +408,19 @@ function Dashboard() {
                 <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
                   <Typography variant="body1" sx={{ color: '#64748B' }}>
                     No category data available
-                </Typography>
+                  </Typography>
                 </Box>
               )}
             </Box>
           </StyledPaper>
         </Grid>
-        </Grid>
-  
-      {/* New Features Row */}
-      <Grid container spacing={3} sx={{ mb: 3 }}>
+      </Grid>
+
+      {/* Payment Method Analysis and Currency Distribution */}
+      <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
+        Financial Details
+      </Typography>
+      <Grid container spacing={2} columns={12} sx={{ mb: 3 }}>
         {/* Payment Method Analysis */}
         <Grid item xs={12} md={6}>
           <StyledPaper>
@@ -395,7 +429,7 @@ function Dashboard() {
             </Typography>
             {paymentMethodData.length > 0 ? (
               <Box sx={{ height: 250, mt: 2 }}>
-              <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={paymentMethodData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
@@ -403,8 +437,8 @@ function Dashboard() {
                     <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
                     <Bar dataKey="value" fill="#3461FF" />
                   </BarChart>
-              </ResponsiveContainer>
-            </Box>
+                </ResponsiveContainer>
+              </Box>
             ) : (
               <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 200 }}>
                 <Typography variant="body1" sx={{ color: '#64748B' }}>
@@ -414,7 +448,7 @@ function Dashboard() {
             )}
           </StyledPaper>
         </Grid>
-  
+
         {/* Currency Distribution */}
         <Grid item xs={12} md={6}>
           <StyledPaper>
@@ -455,16 +489,20 @@ function Dashboard() {
         </Grid>
       </Grid>
 
-      {/* Top Spending Categories */}
-      <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12}>
+      {/* Top Spending Categories and Recent Transactions */}
+      <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
+        Transactions
+      </Typography>
+      <Grid container spacing={2} columns={12}>
+        {/* Top Spending Categories */}
+        <Grid item xs={12} md={5}>
           <StyledPaper>
             <Typography variant="h6" gutterBottom sx={{ color: '#1E293B', fontWeight: 600 }}>
               Top Spending Categories
             </Typography>
             {topCategories.length > 0 ? (
               <TableContainer sx={{ mt: 2 }}>
-                <Table>
+                <Table size="small">
                   <TableHead>
                     <TableRow>
                       <TableCell>Category</TableCell>
@@ -505,11 +543,9 @@ function Dashboard() {
             )}
           </StyledPaper>
         </Grid>
-      </Grid>
-  
-      {/* Recent Transactions */}
-      <Grid container spacing={3}>
-        <Grid item xs={12}>
+
+        {/* Recent Transactions */}
+        <Grid item xs={12} md={7}>
           <StyledPaper>
             <Typography variant="h6" gutterBottom sx={{ color: '#1E293B', fontWeight: 600 }}>
               Recent Transactions
@@ -517,7 +553,7 @@ function Dashboard() {
             <Box sx={{ mt: 2 }}>
               {recentTransactions.length > 0 ? (
                 <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
-                  {recentTransactions.map((transaction) => (
+                  {recentTransactions.slice(0, 5).map((transaction) => (
                     <React.Fragment key={transaction.id}>
                       <ListItem alignItems="flex-start">
                         <ListItemAvatar>
@@ -581,8 +617,66 @@ function Dashboard() {
           </StyledPaper>
         </Grid>
       </Grid>
-    </DashboardContainer>
+    </Box>
   );
 }
 
-export default Dashboard;
+export default function Dashboard() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const handleDrawerToggle = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        {/* App Bar with hamburger menu */}
+        <AppBar 
+          position="fixed" 
+          color="default"
+          elevation={0}
+          sx={{
+            zIndex: (theme) => theme.zIndex.drawer + 1,
+            bgcolor: 'background.paper',
+            borderBottom: '1px solid #E2E8F0',
+          }}
+        >
+          <Toolbar>
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              edge="start"
+              onClick={handleDrawerToggle}
+              sx={{ mr: 2 }}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1, color: '#1E293B' }}>
+              FinTrack Dashboard
+            </Typography>
+          </Toolbar>
+        </AppBar>
+        
+        {/* Sidebar */}
+        <Sidebar open={sidebarOpen} onClose={handleDrawerToggle} />
+        
+        {/* Main content */}
+        <Box
+          component="main"
+          sx={{
+            flexGrow: 1,
+            pt: 8, // Space for fixed AppBar
+            px: 2,
+            backgroundColor: '#F8FAFF',
+          }}
+        >
+          <Container maxWidth="lg" sx={{ py: 3 }}>
+            <FinancialContent />
+          </Container>
+        </Box>
+      </Box>
+    </ThemeProvider>
+  );
+}

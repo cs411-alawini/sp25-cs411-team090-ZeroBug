@@ -54,6 +54,79 @@ router.get('/user/:userId', async (req, res) => {
   }
 });
 
+// Get transaction summary for a user
+router.get('/summary/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { period, startDate, endDate } = req.query;
+    
+    let timeFilter = '';
+    const queryParams = [userId];
+    
+    if (startDate && endDate) {
+      timeFilter = 'AND t.transaction_date BETWEEN ? AND ?';
+      queryParams.push(startDate, endDate);
+    } else if (period) {
+      let dateFilter;
+      const now = new Date();
+      
+      switch(period) {
+        case 'week':
+          // Calculate first day of current week (Sunday)
+          const firstDayOfWeek = new Date(now);
+          firstDayOfWeek.setDate(now.getDate() - now.getDay());
+          firstDayOfWeek.setHours(0, 0, 0, 0);
+          dateFilter = firstDayOfWeek.toISOString().split('T')[0];
+          break;
+        case 'month':
+          dateFilter = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-01`;
+          break;
+        case 'year':
+          dateFilter = `${now.getFullYear()}-01-01`;
+          break;
+        default:
+          dateFilter = '1900-01-01'; // All time
+      }
+      
+      timeFilter = 'AND t.transaction_date >= ?';
+      queryParams.push(dateFilter);
+    }
+    
+    const [summary] = await db.query(
+      `SELECT 
+        0 as total_income,
+        SUM(t.amount) as total_expense,
+        (SELECT base_currency FROM User WHERE user_id = ?) as base_currency
+      FROM Transaction t
+      WHERE t.user_id = ? ${timeFilter}`,
+      [userId, ...queryParams]
+    );
+    
+    const [categories] = await db.query(
+      `SELECT 
+        c.category_id, 
+        c.category_name, 
+        c.category_type,
+        SUM(t.amount) as total_amount
+      FROM Transaction t
+      JOIN Category c ON t.category_id = c.category_id
+      WHERE t.user_id = ? ${timeFilter}
+      GROUP BY c.category_id
+      ORDER BY total_amount DESC`,
+      queryParams
+    );
+    
+    res.json({
+      summary: summary[0],
+      categories
+    });
+  } catch (error) {
+    console.error('Error getting transaction summary:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
 // Get a specific transaction
 router.get('/:transactionId', async (req, res) => {
   try {
@@ -163,78 +236,5 @@ router.delete('/:transactionId', async (req, res) => {
   }
 });
 
-// Get transaction summary for a user
-router.get('/summary/:userId', async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const { period, startDate, endDate } = req.query;
-    
-    let timeFilter = '';
-    const queryParams = [userId];
-    
-    if (startDate && endDate) {
-      timeFilter = 'AND t.transaction_date BETWEEN ? AND ?';
-      queryParams.push(startDate, endDate);
-    } else if (period) {
-      let dateFilter;
-      const now = new Date();
-      
-      switch(period) {
-        case 'week':
-          // Calculate first day of current week (Sunday)
-          const firstDayOfWeek = new Date(now);
-          firstDayOfWeek.setDate(now.getDate() - now.getDay());
-          firstDayOfWeek.setHours(0, 0, 0, 0);
-          dateFilter = firstDayOfWeek.toISOString().split('T')[0];
-          break;
-        case 'month':
-          dateFilter = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-01`;
-          break;
-        case 'year':
-          dateFilter = `${now.getFullYear()}-01-01`;
-          break;
-        default:
-          dateFilter = '1900-01-01'; // All time
-      }
-      
-      timeFilter = 'AND t.transaction_date >= ?';
-      queryParams.push(dateFilter);
-    }
-    
-    // Simplified query without currency exchange
-    const [summary] = await db.query(
-      `SELECT 
-        0 as total_income,
-        SUM(t.amount) as total_expense,
-        (SELECT base_currency FROM User WHERE user_id = ?) as base_currency
-      FROM Transaction t
-      WHERE t.user_id = ? ${timeFilter}`,
-      [userId, ...queryParams]
-    );
-    
-    // Simplified query for categories
-    const [categories] = await db.query(
-      `SELECT 
-        c.category_id, 
-        c.category_name, 
-        c.category_type,
-        SUM(t.amount) as total_amount
-      FROM Transaction t
-      JOIN Category c ON t.category_id = c.category_id
-      WHERE t.user_id = ? ${timeFilter}
-      GROUP BY c.category_id
-      ORDER BY total_amount DESC`,
-      queryParams
-    );
-    
-    res.json({
-      summary: summary[0],
-      categories
-    });
-  } catch (error) {
-    console.error('Error getting transaction summary:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
 
 module.exports = router;
