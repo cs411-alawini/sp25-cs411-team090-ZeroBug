@@ -10,10 +10,13 @@ export const SyncedExpenseCharts = () => {
 
   // Format value as currency
   const valueFormatter = (value) => {
-    if (typeof value === 'number') {
-      return `$${value.toFixed(2)}`;
+    // Extract the numeric value if it's an object
+    const numericValue = typeof value === 'object' && value !== null ? value.value : value;
+    
+    if (typeof numericValue === 'number') {
+      return `$${numericValue.toFixed(2)}`;
     }
-    return `$${value}`;
+    return '';
   };
 
   // Ensure every data item has an 'id' field
@@ -34,9 +37,32 @@ export const SyncedExpenseCharts = () => {
   ]);
 
   // Common props for both charts
-  const commonProps = {
+  const barChartProps = {
     height: 250,
     margin: { top: 10, bottom: 30, left: 40, right: 10 },
+    slotProps: {
+      legend: {
+        hidden: true,
+      },
+    },
+  };
+
+  // Props for pie chart with legend visible
+  const pieChartProps = {
+    height: 250,
+    margin: { top: 10, bottom: 30, left: 40, right: 30 },
+    slotProps: {
+      legend: {
+        direction: 'row',
+        position: { vertical: 'bottom', horizontal: 'middle' },
+        padding: 0,
+      },
+    },
+  };
+
+  // Handle highlighting in both charts
+  const handleHighlight = (id) => {
+    setHighlightedItem(id === highlightedItem ? null : id);
   };
 
   return (
@@ -47,25 +73,25 @@ export const SyncedExpenseCharts = () => {
             Expenses by Category (Bar)
           </Typography>
           <BarChart
-            {...commonProps}
+            {...barChartProps}
             xAxis={[{
               scaleType: 'band',
               data: expenseData.map(item => item.label),
             }]}
             series={[{
               data: expenseData.map(item => item.value),
-              color: '#3461FF',
-              highlightScope: { faded: 'global', highlighted: 'item' },
-              valueFormatter: valueFormatter,
+              color: expenseData.map(item => 
+                highlightedItem === item.id || highlightedItem === null ? item.color : 'rgba(0,0,0,0.2)'
+              ),
+              valueFormatter,
+              label: 'Amount',
             }]}
             tooltip={{ 
               trigger: 'item',
-              formatter: (params) => {
-                return `${params.axisValueLabel}: ${valueFormatter(params.value)}`;
-              }
+              formatter: (params) => `${params.name}: ${valueFormatter(params.value)}`
             }}
             onItemClick={(_, itemIndex) => {
-              setHighlightedItem(highlightedItem === itemIndex ? null : itemIndex);
+              handleHighlight(expenseData[itemIndex].id);
             }}
           />
         </Grid>
@@ -75,18 +101,25 @@ export const SyncedExpenseCharts = () => {
             Expenses by Category (Pie)
           </Typography>
           <PieChart
-            {...commonProps}
+            {...pieChartProps}
             series={[{
-              data: expenseData.map((item, index) => ({
-                ...item,
-                highlighted: highlightedItem === index
+              data: expenseData.map(item => ({
+                id: item.id,
+                value: item.value,
+                label: item.label,
+                color: item.color,
+                highlighted: highlightedItem === item.id
               })),
               highlightScope: { faded: 'global', highlighted: 'item' },
               faded: { innerRadius: 30, additionalRadius: -30, color: 'gray' },
-              valueFormatter: valueFormatter,
+              valueFormatter,
             }]}
+            tooltip={{ 
+              trigger: 'item',
+              formatter: (params) => `${params.name}: ${valueFormatter(params.value)}`
+            }}
             onItemClick={(_, itemIndex) => {
-              setHighlightedItem(highlightedItem === itemIndex ? null : itemIndex);
+              handleHighlight(expenseData[itemIndex].id);
             }}
           />
         </Grid>
