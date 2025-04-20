@@ -570,7 +570,7 @@ function FinancialContent() {
               Expense Categories
             </Typography>
             <Box sx={{ height: 300, mt: 2 }}>
-            <SyncedExpenseCharts pieData={categorySummary} barData={categorySummary} />
+            <SyncedExpenseCharts  />
             </Box>
           </StyledPaper>
         </Grid>
