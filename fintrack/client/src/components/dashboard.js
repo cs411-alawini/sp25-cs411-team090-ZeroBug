@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
@@ -43,34 +42,20 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import { DataGrid } from '@mui/x-data-grid';
 import { SyncedExpenseCharts } from './charts/SyncedExpenseCharts';
 import axios from 'axios';
-
-// Create a basic theme instead of using AppTheme
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#3461FF',
-    },
-    secondary: {
-      main: '#4CAF50',
-    },
-    background: {
-      default: '#F8FAFF',
-      paper: '#FFFFFF'
-    }
-  },
-  typography: {
-    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-  },
-});
+// Import AppTheme and ColorModeSelect
+import AppTheme from './shared-theme/AppTheme';
+import ColorModeSelect from './shared-theme/ColorModeSelect';
 
 const drawerWidth = 240;
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
-  backgroundColor: '#FFFFFF',
+  backgroundColor: theme.palette.background.paper,
   borderRadius: 16,
   padding: theme.spacing(2),
   height: '100%',
-  boxShadow: '0px 2px 6px rgba(0, 0, 0, 0.05)',
+  boxShadow: theme.palette.mode === 'dark' 
+    ? '0px 2px 6px rgba(0, 0, 0, 0.2)' 
+    : '0px 2px 6px rgba(0, 0, 0, 0.05)',
   [theme.breakpoints.up('md')]: {
     padding: theme.spacing(3),
   },
@@ -106,7 +91,7 @@ function Sidebar({ open, onClose }) {
       }}
     >
       <Box sx={{ p: 2 }}>
-        <Typography variant="h6" sx={{ fontWeight: 600, color: '#1E293B' }}>
+        <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary' }}>
           FinTrack
         </Typography>
       </Box>
@@ -208,7 +193,12 @@ function TransactionsDataGrid({ transactions }) {
         <Chip
           label={params.value}
           size="small"
-          sx={{ backgroundColor: '#EEF2FF', color: '#3461FF' }}
+          sx={{ 
+            backgroundColor: (theme) => 
+              theme.palette.mode === 'dark' ? 'rgba(52, 97, 255, 0.2)' : '#EEF2FF',
+            color: (theme) => 
+              theme.palette.mode === 'dark' ? '#6B8AFF' : '#3461FF'
+          }}
         />
       ),
     },
@@ -222,7 +212,12 @@ function TransactionsDataGrid({ transactions }) {
             icon={getPaymentMethodIcon(params.value)}
             label={params.value}
             size="small"
-            sx={{ backgroundColor: '#F8FAFF' }}
+            sx={{ 
+              backgroundColor: (theme) => 
+                theme.palette.mode === 'dark' ? 'rgba(52, 97, 255, 0.2)' : '#F8FAFF',
+              color: (theme) => 
+                theme.palette.mode === 'dark' ? '#6B8AFF' : '#3461FF'
+            }}
           />
         ) : null
       ),
@@ -237,7 +232,9 @@ function TransactionsDataGrid({ transactions }) {
           variant="body2" 
           component="div"
           sx={{ 
-            color: params.value < 0 ? '#FF3B3B' : '#4CAF50',
+            color: (theme) => params.value < 0 
+              ? theme.palette.error.main
+              : theme.palette.success.main,
             fontWeight: 600 
           }}
         >
@@ -253,7 +250,12 @@ function TransactionsDataGrid({ transactions }) {
         <Chip
           label={params.value}
           size="small"
-          sx={{ backgroundColor: '#F1F5F9' }}
+          sx={{ 
+            backgroundColor: (theme) => 
+              theme.palette.mode === 'dark' ? 'rgba(52, 97, 255, 0.2)' : '#F1F5F9',
+            color: (theme) => 
+              theme.palette.mode === 'dark' ? '#6B8AFF' : '#64748B'
+          }}
         />
       ),
     },
@@ -291,14 +293,14 @@ function TransactionsDataGrid({ transactions }) {
         sx={{
           border: 'none',
           '& .MuiDataGrid-cell': {
-            borderBottom: '1px solid #F1F5F9',
+            borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
           },
           '& .MuiDataGrid-columnHeaders': {
-            backgroundColor: '#F8FAFF',
-            borderBottom: '1px solid #E2E8F0',
+            backgroundColor: (theme) => theme.palette.background.default,
+            borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
           },
           '& .MuiDataGrid-footerContainer': {
-            borderTop: '1px solid #E2E8F0',
+            borderTop: (theme) => `1px solid ${theme.palette.divider}`,
           },
         }}
       />
@@ -476,26 +478,26 @@ function FinancialContent() {
       <Grid container spacing={2} columns={12} sx={{ mb: 3 }}>
         <Grid item xs={12} md={6}>
           <StyledPaper>
-            <Typography variant="h6" gutterBottom sx={{ color: '#1E293B', fontWeight: 600 }}>
+            <Typography variant="h6" gutterBottom sx={{ color: 'text.primary', fontWeight: 600 }}>
               Financial Summary
             </Typography>
             <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="body1" sx={{ color: '#64748B' }}>Total Income:</Typography>
-                <Typography variant="h6" sx={{ color: '#4CAF50', fontWeight: 600 }}>
+                <Typography variant="body1" sx={{ color: 'text.secondary' }}>Total Income:</Typography>
+                <Typography variant="h6" sx={{ color: 'success.main', fontWeight: 600 }}>
                   ${parseFloat(totalIncome).toFixed(2)}
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="body1" sx={{ color: '#64748B' }}>Total Expenses:</Typography>
-                <Typography variant="h6" sx={{ color: '#FF3B3B', fontWeight: 600 }}>
+                <Typography variant="body1" sx={{ color: 'text.secondary' }}>Total Expenses:</Typography>
+                <Typography variant="h6" sx={{ color: 'error.main', fontWeight: 600 }}>
                   ${parseFloat(totalExpense).toFixed(2)}
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="body1" sx={{ color: '#64748B' }}>Net Balance:</Typography>
+                <Typography variant="body1" sx={{ color: 'text.secondary' }}>Net Balance:</Typography>
                 <Typography variant="h6" sx={{ 
-                  color: totalIncome - totalExpense >= 0 ? '#4CAF50' : '#FF3B3B', 
+                  color: totalIncome - totalExpense >= 0 ? 'success.main' : 'error.main', 
                   fontWeight: 600 
                 }}>
                   ${parseFloat(totalIncome - totalExpense).toFixed(2)}
@@ -503,13 +505,13 @@ function FinancialContent() {
               </Box>
               {lastActivity && (
                 <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #F1F5F9' }}>
-                  <Typography variant="subtitle2" sx={{ color: '#64748B', mb: 1 }}>
+                  <Typography variant="subtitle2" sx={{ color: 'text.secondary', mb: 1 }}>
                     Last Activity:
                   </Typography>
-                  <Typography variant="body2" sx={{ color: '#1E293B' }}>
+                  <Typography variant="body2" sx={{ color: 'text.primary' }}>
                     {lastActivity.description} - ${parseFloat(lastActivity.amount).toFixed(2)}
                   </Typography>
-                  <Typography variant="caption" sx={{ color: '#94A3B8' }}>
+                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                     {lastActivity.date}
                   </Typography>
                 </Box>
@@ -521,7 +523,7 @@ function FinancialContent() {
         {/* Currency Distribution - moved here */}
         <Grid item xs={12} md={6}>
           <StyledPaper>
-            <Typography variant="h6" gutterBottom sx={{ color: '#1E293B', fontWeight: 600 }}>
+            <Typography variant="h6" gutterBottom sx={{ color: 'text.primary', fontWeight: 600 }}>
               Currency Distribution
             </Typography>
             {currencyDistribution.length > 0 ? (
@@ -549,7 +551,7 @@ function FinancialContent() {
               </TableContainer>
             ) : (
               <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 200 }}>
-                <Typography variant="body1" sx={{ color: '#64748B' }}>
+                <Typography variant="body1" sx={{ color: 'text.secondary' }}>
                   No currency data available
                 </Typography>
               </Box>
@@ -566,11 +568,11 @@ function FinancialContent() {
         {/* Expense Categories - moved here */}
         <Grid item xs={12} md={12}>
           <StyledPaper>
-            <Typography variant="h6" gutterBottom sx={{ color: '#1E293B', fontWeight: 600 }}>
+            <Typography variant="h6" gutterBottom sx={{ color: 'text.primary', fontWeight: 600 }}>
               Expense Categories
             </Typography>
             <Box sx={{ height: 300, mt: 2 }}>
-            <SyncedExpenseCharts  />
+            <SyncedExpenseCharts />
             </Box>
           </StyledPaper>
         </Grid>
@@ -583,14 +585,14 @@ function FinancialContent() {
       <Grid container spacing={2} columns={12} sx={{ mb: 3 }}>
         <Grid item xs={12}>
           <StyledPaper>
-            <Typography variant="h6" gutterBottom sx={{ color: '#1E293B', fontWeight: 600 }}>
+            <Typography variant="h6" gutterBottom sx={{ color: 'text.primary', fontWeight: 600 }}>
               All Transactions
             </Typography>
             <Box sx={{ mt: 2 }}>
               {allTransactions.length > 0 ? (
                 <TransactionsDataGrid transactions={allTransactions} />
               ) : (
-                <Typography variant="body1" align="center" sx={{ py: 2, color: '#64748B' }}>
+                <Typography variant="body1" align="center" sx={{ py: 2, color: 'text.secondary' }}>
                   No transactions available
                 </Typography>
               )}
@@ -606,7 +608,7 @@ function FinancialContent() {
       <Grid container spacing={2} columns={12}>
         <Grid item xs={12}>
           <StyledPaper>
-            <Typography variant="h6" gutterBottom sx={{ color: '#1E293B', fontWeight: 600 }}>
+            <Typography variant="h6" gutterBottom sx={{ color: 'text.primary', fontWeight: 600 }}>
               Top Spending Categories
             </Typography>
             {topCategories.length > 0 ? (
@@ -646,7 +648,7 @@ function FinancialContent() {
                 </Table>
               </TableContainer>
             ) : (
-              <Typography variant="body1" align="center" sx={{ py: 2, color: '#64748B' }}>
+              <Typography variant="body1" align="center" sx={{ py: 2, color: 'text.secondary' }}>
                 No category data available
               </Typography>
             )}
@@ -665,10 +667,10 @@ export default function Dashboard() {
   };
 
   return (
-    <ThemeProvider theme={theme}>
+    <AppTheme>
       <CssBaseline />
       <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        {/* App Bar with hamburger menu */}
+        {/* App Bar with hamburger menu and theme selector */}
         <AppBar 
           position="fixed" 
           color="default"
@@ -689,9 +691,11 @@ export default function Dashboard() {
             >
               <MenuIcon />
             </IconButton>
-            <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1, color: '#1E293B' }}>
+            <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1, color: 'text.primary' }}>
               FinTrack Dashboard
             </Typography>
+            {/* Add ColorModeSelect for theme switching */}
+            <ColorModeSelect sx={{ ml: 1 }} />
           </Toolbar>
         </AppBar>
         
@@ -705,7 +709,7 @@ export default function Dashboard() {
             flexGrow: 1,
             pt: 8, // Space for fixed AppBar
             px: 2,
-            backgroundColor: '#F8FAFF',
+            backgroundColor: 'background.default', // Use theme background instead of hardcoded color
           }}
         >
           <Container maxWidth="lg" sx={{ py: 3 }}>
@@ -713,6 +717,6 @@ export default function Dashboard() {
           </Container>
         </Box>
       </Box>
-    </ThemeProvider>
+    </AppTheme>
   );
 }
