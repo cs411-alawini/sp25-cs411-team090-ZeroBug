@@ -159,15 +159,14 @@ router.post('/', async (req, res) => {
       currency_code, 
       transaction_date, 
       transaction_type, 
-      description,
-      payment_method
+      description
     } = req.body;
     
     const [result] = await db.query(
       `INSERT INTO Transaction 
-       (user_id, category_id, amount, currency_code, transaction_date, transaction_type, description, payment_method) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [user_id, category_id, amount, currency_code, transaction_date, transaction_type, description, payment_method]
+       (user_id, category_id, amount, currency_code, transaction_date, transaction_type, description) 
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [user_id, category_id, amount, currency_code, transaction_date, transaction_type, description]
     );
     
     res.status(201).json({ 
@@ -178,8 +177,7 @@ router.post('/', async (req, res) => {
       currency_code,
       transaction_date,
       transaction_type,
-      description,
-      payment_method
+      description
     });
   } catch (error) {
     console.error('Error creating transaction:', error);
@@ -196,16 +194,15 @@ router.put('/:transactionId', async (req, res) => {
       currency_code, 
       transaction_date, 
       transaction_type, 
-      description,
-      payment_method
+      description
     } = req.body;
     
     await db.query(
       `UPDATE Transaction 
        SET category_id = ?, amount = ?, currency_code = ?, transaction_date = ?, 
-           transaction_type = ?, description = ?, payment_method = ?
+           transaction_type = ?, description = ?
        WHERE transaction_id = ?`,
-      [category_id, amount, currency_code, transaction_date, transaction_type, description, payment_method, req.params.transactionId]
+      [category_id, amount, currency_code, transaction_date, transaction_type, description, req.params.transactionId]
     );
     
     res.json({ 
@@ -215,8 +212,7 @@ router.put('/:transactionId', async (req, res) => {
       currency_code,
       transaction_date,
       transaction_type,
-      description,
-      payment_method
+      description
     });
   } catch (error) {
     console.error('Error updating transaction:', error);

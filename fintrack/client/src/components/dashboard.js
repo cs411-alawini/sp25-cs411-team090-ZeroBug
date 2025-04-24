@@ -45,6 +45,7 @@ import axios from 'axios';
 // Import AppTheme and ColorModeSelect
 import AppTheme from './shared-theme/AppTheme';
 import ColorModeSelect from './shared-theme/ColorModeSelect';
+import Sidebar from './shared/Sidebar';
 
 const drawerWidth = 240;
 
@@ -60,84 +61,6 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
     padding: theme.spacing(3),
   },
 }));
-
-// Sidebar component - now always temporary for hamburger style
-function Sidebar({ open, onClose }) {
-  const menuItems = [
-    { text: 'Dashboard', icon: <DashboardIcon />, active: true },
-    { text: 'Transactions', icon: <ReceiptIcon /> },
-    { text: 'Accounts', icon: <AccountBalanceWalletIcon /> },
-    { text: 'Analytics', icon: <BarChartIcon /> },
-    { text: 'Settings', icon: <SettingsIcon /> },
-  ];
-
-  return (
-    <Drawer
-      variant="temporary"
-      open={open}
-      onClose={onClose}
-      ModalProps={{
-        keepMounted: true, // Better mobile performance
-      }}
-      sx={{
-        display: { xs: 'block' },
-        '& .MuiDrawer-paper': {
-          width: drawerWidth,
-          boxSizing: 'border-box',
-          backgroundColor: '#FFFFFF',
-          borderRight: 'none',
-          boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.05)',
-        },
-      }}
-    >
-      <Box sx={{ p: 2 }}>
-        <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary' }}>
-          FinTrack
-        </Typography>
-      </Box>
-      <Divider />
-      <List sx={{ mt: 2 }}>
-        {menuItems.map((item) => (
-          <ListItem key={item.text} disablePadding>
-            <ListItemButton
-              sx={{
-                borderRadius: '10px',
-                mx: 1,
-                mb: 0.5,
-                backgroundColor: item.active ? '#EEF2FF' : 'transparent',
-                color: item.active ? '#3461FF' : '#64748B',
-                '&:hover': {
-                  backgroundColor: '#F8FAFF',
-                },
-              }}
-            >
-              <ListItemIcon sx={{ color: item.active ? '#3461FF' : '#64748B' }}>
-                {item.icon}
-              </ListItemIcon>
-              <ListItemText primary={item.text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-      <Box sx={{ mt: 'auto', mb: 2, mx: 2 }}>
-        <ListItemButton
-          sx={{
-            borderRadius: '10px',
-            color: '#64748B',
-            '&:hover': {
-              backgroundColor: '#F8FAFF',
-            },
-          }}
-        >
-          <ListItemIcon sx={{ color: '#64748B' }}>
-            <LogoutIcon />
-          </ListItemIcon>
-          <ListItemText primary="Logout" />
-        </ListItemButton>
-      </Box>
-    </Drawer>
-  );
-}
 
 // API service functions
 const fetchUserTransactions = async (userId) => {
@@ -232,13 +155,11 @@ function TransactionsDataGrid({ transactions }) {
           variant="body2" 
           component="div"
           sx={{ 
-            color: (theme) => params.value < 0 
-              ? theme.palette.error.main
-              : theme.palette.success.main,
+            color: theme => theme.palette.error.main,
             fontWeight: 600 
           }}
         >
-          {params.value < 0 ? '-' : '+'}${Math.abs(params.value).toFixed(2)}
+          {'-'}${Math.abs(params.value).toFixed(2)}
         </Typography>
       ),
     },
@@ -341,10 +262,11 @@ function FinancialContent() {
             month: 'long',
             year: 'numeric'
           }),
-          amount: -t.amount, // Always negative since all are expenses
+          amount: Math.abs(t.amount),
           category: t.category_name,
           payment_method: t.payment_method,
-          currency_code: t.currency_code
+          currency_code: t.currency_code,
+          transaction_type: 'Expense'
         }));
         
         setAllTransactions(transactionsForGrid);
@@ -497,10 +419,10 @@ function FinancialContent() {
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Typography variant="body1" sx={{ color: 'text.secondary' }}>Net Balance:</Typography>
                 <Typography variant="h6" sx={{ 
-                  color: totalIncome - totalExpense >= 0 ? 'success.main' : 'error.main', 
+                  color: 'error.main', 
                   fontWeight: 600 
                 }}>
-                  ${parseFloat(totalIncome - totalExpense).toFixed(2)}
+                  -${parseFloat(totalExpense).toFixed(2)}
                 </Typography>
               </Box>
               {lastActivity && (
@@ -699,7 +621,7 @@ export default function Dashboard() {
           </Toolbar>
         </AppBar>
         
-        {/* Sidebar */}
+        {/* Use the shared Sidebar */}
         <Sidebar open={sidebarOpen} onClose={handleDrawerToggle} />
         
         {/* Main content */}

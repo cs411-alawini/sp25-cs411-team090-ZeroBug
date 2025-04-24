@@ -11,3 +11,34 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Global scrollbar styling */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(155, 155, 155, 0.7) transparent;
+}
+
+/* Works on Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(155, 155, 155, 0.7);
+  border-radius: 20px;
+  border: transparent;
+}
+
+/* Dark mode scrollbar */
+.MuiBox-root[data-mui-color-scheme="dark"] *::-webkit-scrollbar-thumb {
+  background-color: rgba(80, 80, 80, 0.7);
+}
+
+.MuiBox-root[data-mui-color-scheme="dark"] * {
+  scrollbar-color: rgba(80, 80, 80, 0.7) transparent;
+}

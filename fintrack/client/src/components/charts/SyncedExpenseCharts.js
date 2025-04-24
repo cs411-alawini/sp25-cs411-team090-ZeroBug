@@ -1,12 +1,67 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PieChart } from '@mui/x-charts/PieChart';
 import { BarChart } from '@mui/x-charts/BarChart';
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Grid, Typography, CircularProgress } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
+import axios from 'axios';
 
 export const SyncedExpenseCharts = () => {
   const theme = useTheme();
   const [highlightedItem, setHighlightedItem] = useState(null);
+  const [expenseData, setExpenseData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const userId = 158; // Use the same user ID as in dashboard
+  const [lastUpdated, setLastUpdated] = useState(Date.now());
+
+  // Function to refresh data
+  const refreshData = () => {
+    setLastUpdated(Date.now());
+  };
+
+  // Expose refresh function to the global scope
+  useEffect(() => {
+    // Add a global event listener for transaction updates
+    window.addEventListener('transaction_updated', refreshData);
+    
+    // Clean up the event listener
+    return () => {
+      window.removeEventListener('transaction_updated', refreshData);
+    };
+  }, []);
+
+  // Load real expense data
+  useEffect(() => {
+    const fetchExpenseData = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(`/api/transactions/summary/${userId}`);
+        const summaryData = response.data;
+        
+        // Process category data for charts
+        const colors = ['#2C3E50', '#E74C3C', '#3498DB', '#E91E63', '#9C27B0', '#009688', '#FF9800', '#4CAF50'];
+        const categories = summaryData.categories || [];
+        
+        const processedData = categories
+          .filter(cat => cat.category_type === 'Expense' && Number(cat.total_amount) > 0)
+          .map((cat, index) => ({
+            id: index,
+            value: Math.abs(Number(cat.total_amount) || 0),
+            label: cat.category_name,
+            color: colors[index % colors.length]
+          }));
+        
+        setExpenseData(processedData);
+      } catch (error) {
+        console.error('Error loading expense chart data:', error);
+        // Provide some fallback data if the API call fails
+        setExpenseData([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchExpenseData();
+  }, [userId, lastUpdated]); // Add lastUpdated to update when triggered
 
   // Format value as currency
   const valueFormatter = (value) => {
@@ -18,23 +73,6 @@ export const SyncedExpenseCharts = () => {
     }
     return '';
   };
-
-  // Ensure every data item has an 'id' field
-  function withIds(data) {
-    return data.map((item) => ({
-      ...item,
-      id: item.id || item.label, // Use label as id if not provided
-    }));
-  }
-
-  // Sample data - in a real app, this would be passed as props
-  const expenseData = withIds([
-    { value: 250, label: 'Food', color: '#2C3E50' },
-    { value: 175, label: 'Transport', color: '#E74C3C' },
-    { value: 320, label: 'Shopping', color: '#3498DB' },
-    { value: 130, label: 'Utilities', color: '#E91E63' },
-    { value: 95, label: 'Entertainment', color: '#9C27B0' }
-  ]);
 
   // Common props for both charts
   const barChartProps = {
@@ -65,6 +103,24 @@ export const SyncedExpenseCharts = () => {
     setHighlightedItem(id === highlightedItem ? null : id);
   };
 
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 250 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (expenseData.length === 0) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 250 }}>
+        <Typography variant="body1" color="text.secondary">
+          No expense data available
+        </Typography>
+      </Box>
+    );
+  }
+
   return (
     <Box sx={{ width: '100%' }}>
       <Grid container spacing={2}>
@@ -77,6 +133,10 @@ export const SyncedExpenseCharts = () => {
             xAxis={[{
               scaleType: 'band',
               data: expenseData.map(item => item.label),
+              tickLabelStyle: {
+                fill: theme.palette.text.secondary,
+                fontSize: 12,
+              },
             }]}
             series={[{
               data: expenseData.map(item => item.value),
@@ -92,6 +152,14 @@ export const SyncedExpenseCharts = () => {
             }}
             onItemClick={(_, itemIndex) => {
               handleHighlight(expenseData[itemIndex].id);
+            }}
+            sx={{
+              '.MuiChartsAxis-line, .MuiChartsAxis-tick': {
+                stroke: theme.palette.divider,
+              },
+              '.MuiChartsAxis-tickLabel': {
+                fill: theme.palette.text.secondary,
+              },
             }}
           />
         </Grid>
@@ -120,6 +188,11 @@ export const SyncedExpenseCharts = () => {
             }}
             onItemClick={(_, itemIndex) => {
               handleHighlight(expenseData[itemIndex].id);
+            }}
+            sx={{
+              '.MuiChartsLegend-label': {
+                fill: theme.palette.text.primary,
+              },
             }}
           />
         </Grid>
