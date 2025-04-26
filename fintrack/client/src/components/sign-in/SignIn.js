@@ -18,6 +18,7 @@ import AppTheme from '../shared-theme/AppTheme';
 import ColorModeSelect from '../shared-theme/ColorModeSelect';
 import { GoogleIcon, FacebookIcon, SitemarkIcon } from './components/CustomIcons';
 import logo from '../../logo.svg';
+import axios from 'axios';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -67,6 +68,8 @@ export default function SignIn(props) {
   const [passwordError, setPasswordError] = React.useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
   const [open, setOpen] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [loginError, setLoginError] = React.useState('');
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -76,16 +79,41 @@ export default function SignIn(props) {
     setOpen(false);
   };
 
-  const handleSubmit = (event) => {
-    if (emailError || passwordError) {
-      event.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    
+    if (!validateInputs()) {
       return;
     }
+    
+    setIsLoading(true);
+    setLoginError('');
+    
     const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
+    const email = data.get('email');
+    const password = data.get('password');
+    
+    try {
+      const response = await axios.post('/api/users/login', {
+        email,
+        password
+      });
+      
+      // Save user data to localStorage or context
+      localStorage.setItem('user', JSON.stringify(response.data));
+      
+      // Redirect to dashboard or home page
+      window.location.href = '/dashboard';
+    } catch (error) {
+      console.error('Login error:', error);
+      if (error.response && error.response.status === 401) {
+        setLoginError('Invalid email or password');
+      } else {
+        setLoginError('An error occurred. Please try again later.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const validateInputs = () => {
@@ -140,6 +168,11 @@ export default function SignIn(props) {
               gap: 2,
             }}
           >
+            {loginError && (
+              <Typography color="error" sx={{ textAlign: 'center' }}>
+                {loginError}
+              </Typography>
+            )}
             <FormControl>
               <FormLabel htmlFor="email">Email</FormLabel>
               <TextField
@@ -183,9 +216,9 @@ export default function SignIn(props) {
               type="submit"
               fullWidth
               variant="contained"
-              onClick={validateInputs}
+              disabled={isLoading}
             >
-              Sign in
+              {isLoading ? 'Signing in...' : 'Sign in'}
             </Button>
             <Link
               component="button"
