@@ -30,7 +30,7 @@ import DeleteConfirmationDialog from './DeleteConfirmationDialog';
 import { StyledPaper } from './TransactionsStyles';
 
 export default function Transactions() {
-  const userId = 158; // Using fixed user ID consistent with dashboard
+  const [userId, setUserId] = useState(null); // Initialize userId as null
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [transactions, setTransactions] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -56,12 +56,18 @@ export default function Transactions() {
   });
   const [searchTerm, setSearchTerm] = useState('');
 
-  const handleDrawerToggle = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
-
-  // Load transactions and categories when component mounts
+  // Get userId from localStorage when component mounts
   useEffect(() => {
+    const userData = JSON.parse(localStorage.getItem('user'));
+    if (userData && userData.user_id) {
+      setUserId(userData.user_id);
+    }
+  }, []);
+
+  // Load transactions and categories when userId is available
+  useEffect(() => {
+    if (!userId) return; // Skip if userId is not available
+    
     const loadData = async () => {
       setLoading(true);
       try {
@@ -84,10 +90,16 @@ export default function Transactions() {
     };
     
     loadData();
-  }, [userId]);
+  }, [userId]); // This effect depends on userId now
+
+  const handleDrawerToggle = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
 
   // Fetch transactions with optional filters
   const fetchTransactions = async () => {
+    if (!userId) return; // Skip if userId is not available
+    
     try {
       const filterParams = {};
       

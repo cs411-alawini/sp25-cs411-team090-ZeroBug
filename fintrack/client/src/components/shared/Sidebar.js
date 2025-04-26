@@ -26,7 +26,7 @@ export default function Sidebar({ open, onClose }) {
   const menuItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
     { text: 'Transactions', icon: <ReceiptIcon />, path: '/transactions' },
-    { text: 'Accounts', icon: <AccountBalanceWalletIcon />, path: '/accounts' },
+    { text: 'Account', icon: <AccountBalanceWalletIcon />, path: '/account' },
     { text: 'Analytics', icon: <BarChartIcon />, path: '/analytics' },
     { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },
   ];

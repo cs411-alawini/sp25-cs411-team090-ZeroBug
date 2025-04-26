@@ -10,8 +10,16 @@ export const SyncedExpenseCharts = () => {
   const [highlightedItem, setHighlightedItem] = useState(null);
   const [expenseData, setExpenseData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const userId = 158; // Use the same user ID as in dashboard
+  const [userId, setUserId] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(Date.now());
+
+  // Get userId from localStorage when component mounts
+  useEffect(() => {
+    const userData = JSON.parse(localStorage.getItem('user'));
+    if (userData && userData.user_id) {
+      setUserId(userData.user_id);
+    }
+  }, []);
 
   // Function to refresh data
   const refreshData = () => {
@@ -31,6 +39,8 @@ export const SyncedExpenseCharts = () => {
 
   // Load real expense data
   useEffect(() => {
+    if (!userId) return; // Skip if userId is not available
+    
     const fetchExpenseData = async () => {
       try {
         setLoading(true);
@@ -41,8 +51,13 @@ export const SyncedExpenseCharts = () => {
         const colors = ['#2C3E50', '#E74C3C', '#3498DB', '#E91E63', '#9C27B0', '#009688', '#FF9800', '#4CAF50'];
         const categories = summaryData.categories || [];
         
+        // Ensure we're only showing expense categories with positive amounts
         const processedData = categories
-          .filter(cat => cat.category_type === 'Expense' && Number(cat.total_amount) > 0)
+          .filter(cat => 
+            cat.category_type === 'Expense' && 
+            Math.abs(Number(cat.total_amount)) > 0 &&
+            cat.transaction_type !== 'Income' // Explicitly exclude income transactions
+          )
           .map((cat, index) => ({
             id: index,
             value: Math.abs(Number(cat.total_amount) || 0),

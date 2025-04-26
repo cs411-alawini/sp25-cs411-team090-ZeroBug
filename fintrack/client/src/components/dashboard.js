@@ -155,11 +155,13 @@ function TransactionsDataGrid({ transactions }) {
           variant="body2" 
           component="div"
           sx={{ 
-            color: theme => theme.palette.error.main,
+            color: theme => params.row.transaction_type === 'Income' 
+              ? theme.palette.success.main  // Green for income
+              : theme.palette.error.main,   // Red for expense
             fontWeight: 600 
           }}
         >
-          {'-'}${Math.abs(params.value).toFixed(2)}
+          {params.row.transaction_type === 'Income' ? '+' : '-'}${Math.abs(params.value).toFixed(2)}
         </Typography>
       ),
     },
@@ -232,7 +234,7 @@ function TransactionsDataGrid({ transactions }) {
 // The main content component
 function FinancialContent() {
   // State variables for data
-  const userId = 158; // Using fixed user ID
+  const [userId, setUserId] = useState(null); // Initialize userId as null
   const [isLoading, setIsLoading] = useState(true);
   const [allTransactions, setAllTransactions] = useState([]);
   const [recentTransactions, setRecentTransactions] = useState([]);
@@ -245,8 +247,18 @@ function FinancialContent() {
   const [lastActivity, setLastActivity] = useState(null);
   const [highlightedItem, setHighlightedItem] = useState(null);
 
-  // Fetch data when component mounts
+  // Get userId from localStorage when component mounts
   useEffect(() => {
+    const userData = JSON.parse(localStorage.getItem('user'));
+    if (userData && userData.user_id) {
+      setUserId(userData.user_id);
+    }
+  }, []);
+
+  // Fetch data when userId is available
+  useEffect(() => {
+    if (!userId) return; // Skip if userId is not available
+    
     const loadData = async () => {
       setIsLoading(true);
       try {
@@ -266,7 +278,7 @@ function FinancialContent() {
           category: t.category_name,
           payment_method: t.payment_method,
           currency_code: t.currency_code,
-          transaction_type: 'Expense'
+          transaction_type: t.transaction_type
         }));
         
         setAllTransactions(transactionsForGrid);
@@ -282,22 +294,20 @@ function FinancialContent() {
               month: 'long',
               year: 'numeric'
             }),
-            amount: lastTrans.amount,
+            amount: Math.abs(lastTrans.amount),
             type: lastTrans.transaction_type,
             description: lastTrans.description || lastTrans.category_name
           });
         }
         
-        // Analyze payment methods
+        // Analyze payment methods - only include expense transactions
         const paymentMethods = {};
         transactions.forEach(t => {
-          if (t.payment_method) {
+          if (t.payment_method && t.transaction_type === 'Expense') {
             if (!paymentMethods[t.payment_method]) {
               paymentMethods[t.payment_method] = 0;
             }
-            if (t.transaction_type === 'Expense') {
-              paymentMethods[t.payment_method] += Number(t.amount);
-            }
+            paymentMethods[t.payment_method] += Math.abs(Number(t.amount));
           }
         });
         
@@ -307,28 +317,60 @@ function FinancialContent() {
         }));
         setPaymentMethodData(paymentMethodArr.sort((a, b) => b.value - a.value));
         
-        // Analyze currency distribution
+        // Analyze currency distribution - separate by transaction type
         const currencies = {};
         transactions.forEach(t => {
           if (!currencies[t.currency_code]) {
-            currencies[t.currency_code] = { count: 0, total: 0 };
+            currencies[t.currency_code] = { 
+              count: 0, 
+              total: 0,
+              expense: 0,
+              income: 0
+            };
           }
           currencies[t.currency_code].count += 1;
-          currencies[t.currency_code].total += Number(t.amount);
+          
+          // Track total volume by transaction type
+          if (t.transaction_type === 'Income') {
+            currencies[t.currency_code].income += Math.abs(Number(t.amount));
+          } else {
+            currencies[t.currency_code].expense += Math.abs(Number(t.amount));
+          }
+          
+          currencies[t.currency_code].total += Math.abs(Number(t.amount));
         });
         
         const currencyArr = Object.entries(currencies).map(([code, data]) => ({
           code,
           count: data.count,
-          total: data.total
+          total: data.total,
+          expense: data.expense,
+          income: data.income
         }));
         setCurrencyDistribution(currencyArr);
+        
+        // Calculate income/expense from transactions if API fails
+        let incomeTotal = 0;
+        let expenseTotal = 0;
+        
+        transactions.forEach(t => {
+          if (t.transaction_type === 'Income') {
+            incomeTotal += Math.abs(Number(t.amount));
+          } else if (t.transaction_type === 'Expense') {
+            expenseTotal += Math.abs(Number(t.amount));
+          }
+        });
         
         // Fetch summary data
         const summaryData = await fetchTransactionSummary(userId);
         if (summaryData.summary) {
-          setTotalIncome(summaryData.summary.total_income || 0);
-          setTotalExpense(summaryData.summary.total_expense || 0);
+          // Use API totals if available, otherwise use calculated totals
+          setTotalIncome(summaryData.summary.total_income || incomeTotal);
+          setTotalExpense(summaryData.summary.total_expense || expenseTotal);
+        } else {
+          // If API returns no summary, use calculated totals
+          setTotalIncome(incomeTotal);
+          setTotalExpense(expenseTotal);
         }
         
         // Process category data for pie chart
@@ -339,7 +381,7 @@ function FinancialContent() {
           .filter(cat => cat.category_type === 'Expense')
           .map((cat, index) => ({
             id: index,
-            value: Number(cat.total_amount) || 0,
+            value: Math.abs(Number(cat.total_amount)) || 0,
             label: cat.category_name,
             color: colors[index % colors.length]
           }));
@@ -360,7 +402,7 @@ function FinancialContent() {
     };
     
     loadData();
-  }, [userId]);
+  }, [userId]); // This effect depends on userId now
 
   // Function to render payment method icon
   const getPaymentIcon = (method) => {
@@ -419,10 +461,10 @@ function FinancialContent() {
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Typography variant="body1" sx={{ color: 'text.secondary' }}>Net Balance:</Typography>
                 <Typography variant="h6" sx={{ 
-                  color: 'error.main', 
+                  color: theme => (totalIncome - totalExpense) >= 0 ? theme.palette.success.main : theme.palette.error.main, 
                   fontWeight: 600 
                 }}>
-                  -${parseFloat(totalExpense).toFixed(2)}
+                  {(totalIncome - totalExpense) >= 0 ? '+' : '-'}${Math.abs(totalIncome - totalExpense).toFixed(2)}
                 </Typography>
               </Box>
               {lastActivity && (
@@ -491,10 +533,10 @@ function FinancialContent() {
         <Grid item xs={12} md={12}>
           <StyledPaper>
             <Typography variant="h6" gutterBottom sx={{ color: 'text.primary', fontWeight: 600 }}>
-              Expense Categories
+              Expense Breakdown by Category
             </Typography>
             <Box sx={{ height: 300, mt: 2 }}>
-            <SyncedExpenseCharts />
+              <SyncedExpenseCharts />
             </Box>
           </StyledPaper>
         </Grid>

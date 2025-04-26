@@ -75,10 +75,17 @@ export default function TransactionForm({ open, handleClose, transaction, catego
         return;
       }
 
+      // Get user data from localStorage
+      const userData = JSON.parse(localStorage.getItem('user'));
+      if (!userData || !userData.user_id) {
+        setError('User session not found. Please log in again.');
+        setLoading(false);
+        return;
+      }
+
       // Prepare data for API
-      const userId = 158; // Use the same user ID as in the dashboard
       const apiData = {
-        user_id: userId,
+        user_id: userData.user_id,
         description: formData.description,
         // Convert to negative for expenses
         amount: formData.transaction_type === 'Expense' 
