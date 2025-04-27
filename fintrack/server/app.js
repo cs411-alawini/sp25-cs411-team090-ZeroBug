@@ -10,6 +10,7 @@ const currencyRouter = require('./routes/currency');
 const savingsRouter = require('./routes/savings');
 const indexRouter = require('./routes/index');
 const { initializeDatabase } = require('./db/init');
+const analysisRouter = require('./routes/analysis');
 
 const app = express();
 app.use(bodyParser.json());
@@ -36,6 +37,7 @@ app.use('/api/transactions', transactionsRouter);
 app.use('/api/categories', categoriesRouter);
 app.use('/api/currency', currencyRouter);
 app.use('/api/savings', savingsRouter);
+app.use('/api/analysis', analysisRouter);
 
 // Remove or comment out this route as it overrides the static file serving
 // app.get('/', function (req, res) {

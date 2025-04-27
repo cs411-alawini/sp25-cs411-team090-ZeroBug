@@ -15,6 +15,10 @@ import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
+import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
+import SearchIcon from '@mui/icons-material/Search';
+import AssessmentIcon from '@mui/icons-material/Assessment';
 
 const drawerWidth = 240;
 
@@ -28,6 +32,10 @@ export default function Sidebar({ open, onClose }) {
     { text: 'Transactions', icon: <ReceiptIcon />, path: '/transactions' },
     { text: 'Account', icon: <AccountBalanceWalletIcon />, path: '/account' },
     { text: 'Analytics', icon: <BarChartIcon />, path: '/analytics' },
+    { text: 'Spending Analysis', icon: <AnalyticsIcon />, path: '/analysis' },
+    { text: 'Budget Status', icon: <AssessmentIcon />, path: '/budget-status' },
+    { text: 'Transfer Savings', icon: <SwapHorizIcon />, path: '/transfer-savings' },
+    { text: 'Advanced Search', icon: <SearchIcon />, path: '/advanced-search' },
     { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },
   ];
 

@@ -7,9 +7,40 @@ import Signup from './components/sign-up/SignUp';
 import Transactions from './components/transactions/Transactions';
 import Account from './components/account/Account';
 import Analytics from './components/analytics/Analytics';
+import SpendingAnalysis from './components/analysis/SpendingAnalysis';
+import SavingsTransfer from './components/savings/SavingsTransfer';
+import AdvancedSearch from './components/analysis/AdvancedSearch';
+import BudgetStatus from './components/analysis/BudgetStatus';
 import './index.css';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
+import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
+import SearchIcon from '@mui/icons-material/Search';
+import AssessmentIcon from '@mui/icons-material/Assessment';
 
 function App() {
+  const menuItems = [
+    {
+      text: 'Spending Analysis',
+      icon: <AnalyticsIcon />,
+      path: '/analysis'
+    },
+    {
+      text: 'Budget Status',
+      icon: <AssessmentIcon />,
+      path: '/budget-status'
+    },
+    {
+      text: 'Transfer Savings',
+      icon: <SwapHorizIcon />,
+      path: '/transfer-savings'
+    },
+    {
+      text: 'Advanced Search',
+      icon: <SearchIcon />,
+      path: '/advanced-search'
+    }
+  ];
+
   return (
     <>
       <CssBaseline />
@@ -21,6 +52,10 @@ function App() {
           <Route path="/transactions" element={<Transactions />} />
           <Route path="/account" element={<Account />} />
           <Route path="/analytics" element={<Analytics />} />
+          <Route path="/analysis" element={<SpendingAnalysis />} />
+          <Route path="/transfer-savings" element={<SavingsTransfer />} />
+          <Route path="/advanced-search" element={<AdvancedSearch />} />
+          <Route path="/budget-status" element={<BudgetStatus />} />
           <Route path="/" element={<Navigate to="/login" />} />
           {/* Add more routes as needed */}
         </Routes>
