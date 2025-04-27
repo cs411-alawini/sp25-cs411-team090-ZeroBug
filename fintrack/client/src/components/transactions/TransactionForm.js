@@ -15,9 +15,17 @@ import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import Alert from '@mui/material/Alert';
 import CircularProgress from '@mui/material/CircularProgress';
+import Typography from '@mui/material/Typography';
 
-export default function TransactionForm({ open, handleClose, transaction, categories, currencies, onSave }) {
-  const isEdit = Boolean(transaction?.id);
+export default function TransactionForm({ open, handleClose, transaction, categories, currencies, onSave, baseCurrency, exchangeRates }) {
+  const currencySymbols = {
+    'USD': '$',
+    'EUR': '€',
+    'GBP': '£',
+    'JPY': '¥',
+    'CNY': '¥'
+  };
+
   const [formData, setFormData] = useState({
     description: '',
     amount: '',
@@ -30,7 +38,37 @@ export default function TransactionForm({ open, handleClose, transaction, catego
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Format amount with correct currency symbol
+  const formatCurrency = (value, currency) => {
+    const symbol = currencySymbols[currency] || currency;
+    return `${symbol}${parseFloat(value).toFixed(2)}`;
+  };
+  
+  // Show converted amount when currency changes
+  const [convertedAmount, setConvertedAmount] = useState(null);
+  
   useEffect(() => {
+    if (formData.amount && formData.currency_code && formData.currency_code !== baseCurrency) {
+      // Only calculate if we have exchange rates
+      if (exchangeRates && exchangeRates[formData.currency_code] && exchangeRates[baseCurrency]) {
+        const amountNum = parseFloat(formData.amount);
+        // Convert to USD, then to base currency
+        const amountInUSD = amountNum / exchangeRates[formData.currency_code];
+        const convertedAmt = amountInUSD * exchangeRates[baseCurrency];
+        setConvertedAmount(convertedAmt);
+      }
+    } else {
+      setConvertedAmount(null);
+    }
+  }, [formData.amount, formData.currency_code, baseCurrency, exchangeRates]);
+
+  useEffect(() => {
+    // Get user's base currency
+    const userData = JSON.parse(localStorage.getItem('user'));
+    if (userData && userData.base_currency) {
+      setFormData({ ...formData, currency_code: userData.base_currency });
+    }
+    
     if (transaction) {
       // Convert amount to positive for the form
       const amount = transaction.amount ? Math.abs(transaction.amount).toString() : '';
@@ -41,22 +79,22 @@ export default function TransactionForm({ open, handleClose, transaction, catego
         category_id: transaction.category_id || '',
         transaction_date: transaction.rawDate || new Date().toISOString().split('T')[0],
         payment_method: transaction.payment_method || '',
-        currency_code: transaction.currency_code || 'USD',
+        currency_code: transaction.currency_code || baseCurrency, // Use user's base currency as default
         transaction_type: transaction.transaction_type || 'Expense',
       });
     } else {
-      // Reset form for new transaction
+      // Reset form for new transaction with user's preferred currency
       setFormData({
         description: '',
         amount: '',
         category_id: '',
         transaction_date: new Date().toISOString().split('T')[0],
         payment_method: '',
-        currency_code: 'USD',
+        currency_code: baseCurrency, // Use user's base currency
         transaction_type: 'Expense',
       });
     }
-  }, [transaction]);
+  }, [transaction, baseCurrency]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -99,7 +137,7 @@ export default function TransactionForm({ open, handleClose, transaction, catego
       };
 
       let response;
-      if (isEdit) {
+      if (transaction) {
         // Update existing transaction
         response = await axios.put(`/api/transactions/${transaction.id}`, apiData);
       } else {
@@ -122,7 +160,7 @@ export default function TransactionForm({ open, handleClose, transaction, catego
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle>
-        {isEdit ? 'Edit Transaction' : 'Add New Transaction'}
+        {transaction ? 'Edit Transaction' : 'Add New Transaction'}
       </DialogTitle>
       <DialogContent>
         <Box component="form" sx={{ mt: 1 }} noValidate>
@@ -170,9 +208,21 @@ export default function TransactionForm({ open, handleClose, transaction, catego
                 value={formData.amount}
                 onChange={handleChange}
                 InputProps={{
-                  startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      {formData.currency_code ? 
+                        (currencySymbols[formData.currency_code] || formData.currency_code) : 
+                        '$'}
+                    </InputAdornment>
+                  ),
                 }}
               />
+              {/* Show converted amount if different from base currency */}
+              {convertedAmount && (
+                <Typography variant="caption" sx={{ display: 'block', color: 'text.secondary', ml: 2 }}>
+                  Equivalent: {formatCurrency(convertedAmount, baseCurrency)} ({baseCurrency})
+                </Typography>
+              )}
             </Grid>
             
             <Grid item xs={12} sm={6}>
@@ -271,7 +321,7 @@ export default function TransactionForm({ open, handleClose, transaction, catego
           color="primary"
           disabled={loading}
         >
-          {loading ? <CircularProgress size={24} /> : (isEdit ? 'Update' : 'Add')}
+          {loading ? <CircularProgress size={24} /> : (transaction ? 'Update' : 'Add')}
         </Button>
       </DialogActions>
     </Dialog>

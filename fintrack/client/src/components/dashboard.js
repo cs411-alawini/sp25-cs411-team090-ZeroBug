@@ -84,7 +84,18 @@ const fetchTransactionSummary = async (userId) => {
 };
 
 // Transaction DataGrid component
-function TransactionsDataGrid({ transactions }) {
+function TransactionsDataGrid({ transactions, baseCurrency }) {
+  // Currency symbol mapping
+  const currencySymbols = {
+    'USD': '$',
+    'EUR': '€',
+    'GBP': '£',
+    'JPY': '¥',
+    'CNY': '¥'
+  };
+  
+  const symbol = currencySymbols[baseCurrency] || baseCurrency;
+  
   // Define columns for DataGrid
   const columns = [
     { 
@@ -147,8 +158,8 @@ function TransactionsDataGrid({ transactions }) {
     },
     { 
       field: 'amount', 
-      headerName: 'Amount', 
-      width: 120,
+      headerName: `Amount (${baseCurrency})`, 
+      width: 150,
       type: 'number',
       renderCell: (params) => (
         <Typography 
@@ -156,12 +167,18 @@ function TransactionsDataGrid({ transactions }) {
           component="div"
           sx={{ 
             color: theme => params.row.transaction_type === 'Income' 
-              ? theme.palette.success.main  // Green for income
-              : theme.palette.error.main,   // Red for expense
+              ? theme.palette.success.main
+              : theme.palette.error.main,
             fontWeight: 600 
           }}
         >
-          {params.row.transaction_type === 'Income' ? '+' : '-'}${Math.abs(params.value).toFixed(2)}
+          {params.row.transaction_type === 'Income' ? '+' : '-'}{symbol}{Math.abs(params.value).toFixed(2)}
+          {params.row.original_currency !== baseCurrency && 
+            <Typography variant="caption" display="block" sx={{ color: 'text.secondary' }}>
+              Original: {currencySymbols[params.row.original_currency] || params.row.original_currency}
+              {params.row.original_amount.toFixed(2)}
+            </Typography>
+          }
         </Typography>
       ),
     },
@@ -234,7 +251,9 @@ function TransactionsDataGrid({ transactions }) {
 // The main content component
 function FinancialContent() {
   // State variables for data
-  const [userId, setUserId] = useState(null); // Initialize userId as null
+  const [baseCurrency, setBaseCurrency] = useState('USD');
+  const [userId, setUserId] = useState(null);
+  const [exchangeRates, setExchangeRates] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [allTransactions, setAllTransactions] = useState([]);
   const [recentTransactions, setRecentTransactions] = useState([]);
@@ -247,15 +266,76 @@ function FinancialContent() {
   const [lastActivity, setLastActivity] = useState(null);
   const [highlightedItem, setHighlightedItem] = useState(null);
 
-  // Get userId from localStorage when component mounts
+  // Get userId and base currency from localStorage when component mounts
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem('user'));
-    if (userData && userData.user_id) {
-      setUserId(userData.user_id);
+    if (userData) {
+      if (userData.user_id) {
+        setUserId(userData.user_id);
+      }
+      if (userData.base_currency) {
+        setBaseCurrency(userData.base_currency);
+      }
     }
   }, []);
 
-  // Fetch data when userId is available
+  // Fetch currency exchange rates
+  useEffect(() => {
+    const fetchExchangeRates = async () => {
+      try {
+        const response = await axios.get('/api/currency');
+        const rates = {};
+        
+        // Format exchange rates as a lookup object
+        response.data.forEach(currency => {
+          rates[currency.currency_code] = currency.exchange_rate_to_base;
+        });
+        
+        setExchangeRates(rates);
+      } catch (error) {
+        console.error('Error fetching exchange rates:', error);
+      }
+    };
+    
+    fetchExchangeRates();
+  }, []);
+
+  // Convert amount from one currency to another
+  const convertCurrency = (amount, fromCurrency, toCurrency = baseCurrency) => {
+    if (!amount || fromCurrency === toCurrency) {
+      return amount;
+    }
+    
+    // If we don't have exchange rates yet, return original amount
+    if (!exchangeRates[fromCurrency] || !exchangeRates[toCurrency]) {
+      return amount;
+    }
+    
+    // Convert to base currency (USD), then to target currency
+    // This assumes exchange_rate_to_base is the rate to convert to USD
+    const amountInUSD = amount / exchangeRates[fromCurrency];
+    return amountInUSD * exchangeRates[toCurrency];
+  };
+
+  // Update currency formatter to use the user's base currency
+  const formatCurrency = (value, currency = baseCurrency) => {
+    if (typeof value === 'number') {
+      // Currency symbol mapping - add more as needed
+      const currencySymbols = {
+        'USD': '$',
+        'EUR': '€',
+        'GBP': '£',
+        'JPY': '¥',
+        'CNY': '¥'
+      };
+      
+      const symbol = currencySymbols[currency] || currency;
+      return `${symbol}${value.toFixed(2)}`;
+    }
+    return '';
+  };
+
+  // Process transactions with currency conversion
   useEffect(() => {
     if (!userId) return; // Skip if userId is not available
     
@@ -265,21 +345,46 @@ function FinancialContent() {
         // Fetch transactions
         const transactions = await fetchUserTransactions(userId);
         
-        // Process for grid display
-        const transactionsForGrid = transactions.map(t => ({
-          id: t.transaction_id,
-          type: t.description || t.transaction_type,
-          date: new Date(t.transaction_date).toLocaleDateString('en-US', {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric'
-          }),
-          amount: Math.abs(t.amount),
-          category: t.category_name,
-          payment_method: t.payment_method,
-          currency_code: t.currency_code,
-          transaction_type: t.transaction_type
-        }));
+        // Define summaryData before using it
+        const summaryData = await fetchTransactionSummary(userId);
+        
+        // Keep track of converted totals
+        let incomeTotal = 0;
+        let expenseTotal = 0;
+        
+        // Process for grid display with currency conversion
+        const transactionsForGrid = transactions.map(t => {
+          // Convert amount to user's base currency
+          const convertedAmount = convertCurrency(
+            Math.abs(t.amount), 
+            t.currency_code, 
+            baseCurrency
+          );
+          
+          // Update totals
+          if (t.transaction_type === 'Income') {
+            incomeTotal += convertedAmount;
+          } else if (t.transaction_type === 'Expense') {
+            expenseTotal += convertedAmount;
+          }
+          
+          return {
+            id: t.transaction_id,
+            type: t.description || t.transaction_type,
+            date: new Date(t.transaction_date).toLocaleDateString('en-US', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric'
+            }),
+            amount: convertedAmount, // Converted amount
+            original_amount: Math.abs(t.amount), // Keep original amount
+            original_currency: t.currency_code, // Keep original currency
+            category: t.category_name,
+            payment_method: t.payment_method,
+            currency_code: baseCurrency, // Use base currency for display
+            transaction_type: t.transaction_type
+          };
+        });
         
         setAllTransactions(transactionsForGrid);
         setRecentTransactions(transactionsForGrid.slice(0, 10));
@@ -287,6 +392,12 @@ function FinancialContent() {
         // Get last activity
         if (transactions.length > 0) {
           const lastTrans = transactions[0]; // Assuming transactions are sorted by date desc
+          const convertedAmount = convertCurrency(
+            Math.abs(lastTrans.amount),
+            lastTrans.currency_code,
+            baseCurrency
+          );
+          
           setLastActivity({
             date: new Date(lastTrans.transaction_date).toLocaleDateString('en-US', {
               weekday: 'long',
@@ -294,11 +405,58 @@ function FinancialContent() {
               month: 'long',
               year: 'numeric'
             }),
-            amount: Math.abs(lastTrans.amount),
+            amount: convertedAmount,
             type: lastTrans.transaction_type,
-            description: lastTrans.description || lastTrans.category_name
+            description: lastTrans.description || lastTrans.category_name,
+            currency: baseCurrency
           });
         }
+        
+        // Analyze currency distribution with converted amounts
+        const currencies = {};
+        transactions.forEach(t => {
+          const convertedAmount = convertCurrency(
+            Math.abs(t.amount),
+            t.currency_code, 
+            baseCurrency
+          );
+          
+          if (!currencies[t.currency_code]) {
+            currencies[t.currency_code] = { 
+              count: 0, 
+              total: 0,
+              expense: 0,
+              income: 0,
+              converted_total: 0 // Total in base currency
+            };
+          }
+          
+          currencies[t.currency_code].count += 1;
+          currencies[t.currency_code].total += Math.abs(t.amount); // Original amount
+          currencies[t.currency_code].converted_total += convertedAmount; // Converted amount
+          
+          if (t.transaction_type === 'Income') {
+            currencies[t.currency_code].income += Math.abs(t.amount);
+          } else {
+            currencies[t.currency_code].expense += Math.abs(t.amount);
+          }
+        });
+        
+        const currencyArr = Object.entries(currencies).map(([code, data]) => ({
+          code,
+          count: data.count,
+          total: data.total,
+          expense: data.expense,
+          income: data.income,
+          converted_total: data.converted_total,
+          exchange_rate: exchangeRates[code] || 1
+        }));
+        
+        setCurrencyDistribution(currencyArr);
+        
+        // Use our locally calculated totals (with conversion)
+        setTotalIncome(incomeTotal);
+        setTotalExpense(expenseTotal);
         
         // Analyze payment methods - only include expense transactions
         const paymentMethods = {};
@@ -316,62 +474,6 @@ function FinancialContent() {
           value: Number(value)
         }));
         setPaymentMethodData(paymentMethodArr.sort((a, b) => b.value - a.value));
-        
-        // Analyze currency distribution - separate by transaction type
-        const currencies = {};
-        transactions.forEach(t => {
-          if (!currencies[t.currency_code]) {
-            currencies[t.currency_code] = { 
-              count: 0, 
-              total: 0,
-              expense: 0,
-              income: 0
-            };
-          }
-          currencies[t.currency_code].count += 1;
-          
-          // Track total volume by transaction type
-          if (t.transaction_type === 'Income') {
-            currencies[t.currency_code].income += Math.abs(Number(t.amount));
-          } else {
-            currencies[t.currency_code].expense += Math.abs(Number(t.amount));
-          }
-          
-          currencies[t.currency_code].total += Math.abs(Number(t.amount));
-        });
-        
-        const currencyArr = Object.entries(currencies).map(([code, data]) => ({
-          code,
-          count: data.count,
-          total: data.total,
-          expense: data.expense,
-          income: data.income
-        }));
-        setCurrencyDistribution(currencyArr);
-        
-        // Calculate income/expense from transactions if API fails
-        let incomeTotal = 0;
-        let expenseTotal = 0;
-        
-        transactions.forEach(t => {
-          if (t.transaction_type === 'Income') {
-            incomeTotal += Math.abs(Number(t.amount));
-          } else if (t.transaction_type === 'Expense') {
-            expenseTotal += Math.abs(Number(t.amount));
-          }
-        });
-        
-        // Fetch summary data
-        const summaryData = await fetchTransactionSummary(userId);
-        if (summaryData.summary) {
-          // Use API totals if available, otherwise use calculated totals
-          setTotalIncome(summaryData.summary.total_income || incomeTotal);
-          setTotalExpense(summaryData.summary.total_expense || expenseTotal);
-        } else {
-          // If API returns no summary, use calculated totals
-          setTotalIncome(incomeTotal);
-          setTotalExpense(expenseTotal);
-        }
         
         // Process category data for pie chart
         const colors = ['#2C3E50', '#E74C3C', '#3498DB', '#E91E63', '#9C27B0', '#009688'];
@@ -401,8 +503,11 @@ function FinancialContent() {
       }
     };
     
-    loadData();
-  }, [userId]); // This effect depends on userId now
+    // Only load data if we have exchange rates
+    if (Object.keys(exchangeRates).length > 0) {
+      loadData();
+    }
+  }, [userId, baseCurrency, exchangeRates]); // Add dependencies
 
   // Function to render payment method icon
   const getPaymentIcon = (method) => {
@@ -449,13 +554,13 @@ function FinancialContent() {
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Typography variant="body1" sx={{ color: 'text.secondary' }}>Total Income:</Typography>
                 <Typography variant="h6" sx={{ color: 'success.main', fontWeight: 600 }}>
-                  ${parseFloat(totalIncome).toFixed(2)}
+                  {formatCurrency(totalIncome)}
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Typography variant="body1" sx={{ color: 'text.secondary' }}>Total Expenses:</Typography>
                 <Typography variant="h6" sx={{ color: 'error.main', fontWeight: 600 }}>
-                  ${parseFloat(totalExpense).toFixed(2)}
+                  {formatCurrency(totalExpense)}
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -464,7 +569,7 @@ function FinancialContent() {
                   color: theme => (totalIncome - totalExpense) >= 0 ? theme.palette.success.main : theme.palette.error.main, 
                   fontWeight: 600 
                 }}>
-                  {(totalIncome - totalExpense) >= 0 ? '+' : '-'}${Math.abs(totalIncome - totalExpense).toFixed(2)}
+                  {(totalIncome - totalExpense) >= 0 ? '+' : '-'}{formatCurrency(Math.abs(totalIncome - totalExpense))}
                 </Typography>
               </Box>
               {lastActivity && (
@@ -473,7 +578,7 @@ function FinancialContent() {
                     Last Activity:
                   </Typography>
                   <Typography variant="body2" sx={{ color: 'text.primary' }}>
-                    {lastActivity.description} - ${parseFloat(lastActivity.amount).toFixed(2)}
+                    {lastActivity.description} - {formatCurrency(lastActivity.amount)}
                   </Typography>
                   <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                     {lastActivity.date}
@@ -507,7 +612,7 @@ function FinancialContent() {
                           <Chip label={row.code} size="small" />
                         </TableCell>
                         <TableCell align="right">{row.count}</TableCell>
-                        <TableCell align="right">${row.total.toFixed(2)}</TableCell>
+                        <TableCell align="right">{formatCurrency(row.converted_total)}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -554,7 +659,7 @@ function FinancialContent() {
             </Typography>
             <Box sx={{ mt: 2 }}>
               {allTransactions.length > 0 ? (
-                <TransactionsDataGrid transactions={allTransactions} />
+                <TransactionsDataGrid transactions={allTransactions} baseCurrency={baseCurrency} />
               ) : (
                 <Typography variant="body1" align="center" sx={{ py: 2, color: 'text.secondary' }}>
                   No transactions available
@@ -602,7 +707,7 @@ function FinancialContent() {
                             {category.label}
                           </Box>
                         </TableCell>
-                        <TableCell align="right">${category.value.toFixed(2)}</TableCell>
+                        <TableCell align="right">{formatCurrency(category.value)}</TableCell>
                         <TableCell align="right">
                           {((category.value / totalExpense) * 100).toFixed(1)}%
                         </TableCell>

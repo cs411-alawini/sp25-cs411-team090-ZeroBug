@@ -6,6 +6,7 @@ import Login from './components/sign-in/SignIn';
 import Signup from './components/sign-up/SignUp';
 import Transactions from './components/transactions/Transactions';
 import Account from './components/account/Account';
+import Analytics from './components/analytics/Analytics';
 import './index.css';
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/transactions" element={<Transactions />} />
           <Route path="/account" element={<Account />} />
+          <Route path="/analytics" element={<Analytics />} />
           <Route path="/" element={<Navigate to="/dashboard" />} />
           {/* Add more routes as needed */}
         </Routes>

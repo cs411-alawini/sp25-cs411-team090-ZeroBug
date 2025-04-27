@@ -30,7 +30,9 @@ import DeleteConfirmationDialog from './DeleteConfirmationDialog';
 import { StyledPaper } from './TransactionsStyles';
 
 export default function Transactions() {
-  const [userId, setUserId] = useState(null); // Initialize userId as null
+  const [baseCurrency, setBaseCurrency] = useState('USD');
+  const [userId, setUserId] = useState(null);
+  const [exchangeRates, setExchangeRates] = useState({});
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [transactions, setTransactions] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -56,13 +58,55 @@ export default function Transactions() {
   });
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Get userId from localStorage when component mounts
+  // Get userId and base currency from localStorage when component mounts
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem('user'));
-    if (userData && userData.user_id) {
-      setUserId(userData.user_id);
+    if (userData) {
+      if (userData.user_id) {
+        setUserId(userData.user_id);
+      }
+      if (userData.base_currency) {
+        setBaseCurrency(userData.base_currency);
+      }
     }
   }, []);
+
+  // Fetch currency exchange rates
+  useEffect(() => {
+    const fetchExchangeRates = async () => {
+      try {
+        const response = await axios.get('/api/currency');
+        const rates = {};
+        
+        // Format exchange rates as a lookup object
+        response.data.forEach(currency => {
+          rates[currency.currency_code] = currency.exchange_rate_to_base;
+        });
+        
+        setExchangeRates(rates);
+      } catch (error) {
+        console.error('Error fetching exchange rates:', error);
+      }
+    };
+    
+    fetchExchangeRates();
+  }, []);
+
+  // Convert amount from one currency to another
+  const convertCurrency = (amount, fromCurrency, toCurrency = baseCurrency) => {
+    if (!amount || fromCurrency === toCurrency) {
+      return amount;
+    }
+    
+    // If we don't have exchange rates yet, return original amount
+    if (!exchangeRates[fromCurrency] || !exchangeRates[toCurrency]) {
+      return amount;
+    }
+    
+    // Convert to base currency (USD), then to target currency
+    const amountInUSD = amount / exchangeRates[fromCurrency];
+    return amountInUSD * exchangeRates[toCurrency];
+  };
 
   // Load transactions and categories when userId is available
   useEffect(() => {
@@ -90,7 +134,7 @@ export default function Transactions() {
     };
     
     loadData();
-  }, [userId]); // This effect depends on userId now
+  }, [userId, exchangeRates, baseCurrency]); // Added dependencies
 
   const handleDrawerToggle = () => {
     setSidebarOpen(!sidebarOpen);
@@ -127,23 +171,34 @@ export default function Transactions() {
         params: filterParams
       });
       
-      // Process for grid display
-      const transactionsForGrid = response.data.map(t => ({
-        id: t.transaction_id,
-        type: t.description || t.transaction_type,
-        date: new Date(t.transaction_date).toLocaleDateString('en-US', {
-          day: 'numeric',
-          month: 'long',
-          year: 'numeric'
-        }),
-        rawDate: t.transaction_date,
-        amount: Number(t.amount),
-        category: t.category_name,
-        category_id: t.category_id,
-        payment_method: t.payment_method,
-        currency_code: t.currency_code,
-        transaction_type: t.transaction_type
-      }));
+      // Process for grid display with currency conversion
+      const transactionsForGrid = response.data.map(t => {
+        // Convert amount to user's base currency
+        const convertedAmount = convertCurrency(
+          Math.abs(Number(t.amount)), 
+          t.currency_code, 
+          baseCurrency
+        );
+        
+        return {
+          id: t.transaction_id,
+          type: t.description || t.transaction_type,
+          date: new Date(t.transaction_date).toLocaleDateString('en-US', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+          }),
+          rawDate: t.transaction_date,
+          amount: convertedAmount, // Converted amount
+          original_amount: Math.abs(Number(t.amount)), // Keep original amount
+          original_currency: t.currency_code, // Keep original currency
+          category: t.category_name,
+          category_id: t.category_id,
+          payment_method: t.payment_method,
+          currency_code: baseCurrency, // Display in base currency
+          transaction_type: t.transaction_type
+        };
+      });
       
       setTransactions(transactionsForGrid);
     } catch (error) {
@@ -330,18 +385,19 @@ export default function Transactions() {
                   </Grid>
                 </StyledPaper>
                 
-                {/* Transactions list */}
+                {/* Transactions list with currency information */}
                 <TransactionsList 
                   transactions={filteredTransactions}
                   onEdit={handleEditTransaction}
                   onDelete={handleDeleteClick}
+                  baseCurrency={baseCurrency}
                 />
               </>
             )}
           </Container>
         </Box>
         
-        {/* Transaction Form Dialog */}
+        {/* Transaction Form with currency information */}
         <TransactionForm 
           open={openForm}
           handleClose={() => setOpenForm(false)}
@@ -349,6 +405,8 @@ export default function Transactions() {
           categories={categories}
           currencies={currencies}
           onSave={handleFormSave}
+          baseCurrency={baseCurrency}
+          exchangeRates={exchangeRates}
         />
         
         {/* Filter Dialog */}
