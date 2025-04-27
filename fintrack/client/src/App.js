@@ -21,7 +21,7 @@ function App() {
           <Route path="/transactions" element={<Transactions />} />
           <Route path="/account" element={<Account />} />
           <Route path="/analytics" element={<Analytics />} />
-          <Route path="/" element={<Navigate to="/dashboard" />} />
+          <Route path="/" element={<Navigate to="/login" />} />
           {/* Add more routes as needed */}
         </Routes>
       </Router>
