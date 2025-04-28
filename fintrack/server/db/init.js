@@ -106,6 +106,71 @@ async function initializeDatabase() {
     ('CNY', 7.23)
   `);
 
+  // Check if 'balance' column exists
+  const [columns] = await connection.query(`
+    SHOW COLUMNS FROM User LIKE 'balance'
+  `);
+  if (columns.length === 0) {
+    await connection.query(`
+      ALTER TABLE User
+      ADD COLUMN balance DECIMAL(15,2) DEFAULT 0
+    `);
+  }
+
+  // Drop triggers if they exist (to avoid duplicate triggers on re-init)
+  await connection.query(`DROP TRIGGER IF EXISTS after_transaction_insert`);
+  await connection.query(`DROP TRIGGER IF EXISTS after_transaction_update`);
+  await connection.query(`DROP TRIGGER IF EXISTS after_transaction_delete`);
+
+  // Trigger: After INSERT on Transaction
+  await connection.query(`
+    CREATE TRIGGER after_transaction_insert
+    AFTER INSERT ON Transaction
+    FOR EACH ROW
+    BEGIN
+      IF NEW.transaction_type = 'Income' THEN
+        UPDATE User SET balance = balance + NEW.amount WHERE user_id = NEW.user_id;
+      ELSE
+        UPDATE User SET balance = balance - NEW.amount WHERE user_id = NEW.user_id;
+      END IF;
+    END
+  `);
+
+  // Trigger: After UPDATE on Transaction
+  await connection.query(`
+    CREATE TRIGGER after_transaction_update
+    AFTER UPDATE ON Transaction
+    FOR EACH ROW
+    BEGIN
+      -- Revert the old value
+      IF OLD.transaction_type = 'Income' THEN
+        UPDATE User SET balance = balance - OLD.amount WHERE user_id = OLD.user_id;
+      ELSE
+        UPDATE User SET balance = balance + OLD.amount WHERE user_id = OLD.user_id;
+      END IF;
+      -- Apply the new value
+      IF NEW.transaction_type = 'Income' THEN
+        UPDATE User SET balance = balance + NEW.amount WHERE user_id = NEW.user_id;
+      ELSE
+        UPDATE User SET balance = balance - NEW.amount WHERE user_id = NEW.user_id;
+      END IF;
+    END
+  `);
+
+  // Trigger: After DELETE on Transaction
+  await connection.query(`
+    CREATE TRIGGER after_transaction_delete
+    AFTER DELETE ON Transaction
+    FOR EACH ROW
+    BEGIN
+      IF OLD.transaction_type = 'Income' THEN
+        UPDATE User SET balance = balance - OLD.amount WHERE user_id = OLD.user_id;
+      ELSE
+        UPDATE User SET balance = balance + OLD.amount WHERE user_id = OLD.user_id;
+      END IF;
+    END
+  `);
+
   console.log('Database initialized successfully!');
   await connection.end();
 }

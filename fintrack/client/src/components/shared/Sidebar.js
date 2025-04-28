@@ -33,7 +33,6 @@ export default function Sidebar({ open, onClose }) {
     { text: 'Transactions', icon: <ReceiptIcon />, path: '/transactions' },
     { text: 'Account', icon: <AccountBalanceWalletIcon />, path: '/account' },
     { text: 'Analytics', icon: <BarChartIcon />, path: '/analytics' },
-    { text: 'Spending Analysis', icon: <AnalyticsIcon />, path: '/analysis' },
     { text: 'Budget Status', icon: <AssessmentIcon />, path: '/budget-status' },
     { text: 'Transfer Savings', icon: <SwapHorizIcon />, path: '/transfer-savings' },
     { text: 'Savings Goals', icon: <SavingsIcon />, path: '/saving-goals' },

@@ -49,5 +49,7 @@ app.use('/api/analysis', analysisRouter);
 //   console.log('Node app is running on port 3000');
 // });
 
+require('./cron/currencyUpdater');
+
 // Export the app for bin/www to use
 module.exports = app;
