@@ -112,7 +112,7 @@ const MachineLearningAnalytics = ({ userId, baseCurrency }) => {
         const transactionsData = response.data;
         
         // Send transaction data to ML service for prediction
-        const mlResponse = await axios.post('/ml-api/predict', {
+        const mlResponse = await axios.post('http://34.44.184.196:5001/api/ml/predict', {
           transactions: transactionsData
         });
         
@@ -474,7 +474,7 @@ const MachineLearningAnalytics = ({ userId, baseCurrency }) => {
                     </Typography>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
                       <Typography variant="caption" color="text.secondary">
-                        {anomaly.date.toLocaleDateString()}
+                        {new Date(anomaly.date).toLocaleDateString()}
                       </Typography>
                       <Typography variant="body2" fontWeight="bold">
                         {formatCurrency(anomaly.amount)}
@@ -583,7 +583,7 @@ const BudgetRecommendations = ({ userId, baseCurrency }) => {
         const transactionsData = response.data;
         
         // Send transaction data to ML service for budget recommendations
-        const mlResponse = await axios.post('/ml-api/budget', {
+        const mlResponse = await axios.post('http://34.44.184.196:5001/api/ml/budget', {
           transactions: transactionsData
         });
         

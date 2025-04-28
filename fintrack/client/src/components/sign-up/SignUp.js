@@ -17,6 +17,7 @@ import AppTheme from '../shared-theme/AppTheme';
 import ColorModeSelect from '../shared-theme/ColorModeSelect';
 import { GoogleIcon, FacebookIcon, SitemarkIcon } from './components/CustomIcons';
 import logo from '../../logo.svg';
+import api from '../../services/api';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -67,6 +68,8 @@ export default function SignUp(props) {
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
   const [nameError, setNameError] = React.useState(false);
   const [nameErrorMessage, setNameErrorMessage] = React.useState('');
+  const [signUpError, setSignUpError] = React.useState('');
+  const [isLoading, setIsLoading] = React.useState(false);
 
   const validateInputs = () => {
     const email = document.getElementById('email');
@@ -105,18 +108,42 @@ export default function SignUp(props) {
     return isValid;
   };
 
-  const handleSubmit = (event) => {
-    if (nameError || emailError || passwordError) {
-      event.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!validateInputs()) {
       return;
     }
+
+    setIsLoading(true);
+    setSignUpError('');
+
     const data = new FormData(event.currentTarget);
-    console.log({
-      name: data.get('name'),
-      lastName: data.get('lastName'),
-      email: data.get('email'),
-      password: data.get('password'),
-    });
+    const name = data.get('name');
+    const email = data.get('email');
+    const password = data.get('password');
+
+    try {
+      const response = await api.post('/users', {
+        name,
+        email,
+        password_hash: password,
+      });
+
+      // Save user data to localStorage (so the app knows the new user)
+      localStorage.setItem('user', JSON.stringify(response.data));
+
+      // Redirect to dashboard or wherever you want
+      window.location.href = '/dashboard';
+    } catch (error) {
+      if (error.response && error.response.status === 409) {
+        setSignUpError('Email already exists');
+      } else {
+        setSignUpError('An error occurred. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -138,6 +165,11 @@ export default function SignUp(props) {
             onSubmit={handleSubmit}
             sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
           >
+            {signUpError && (
+              <Typography color="error" sx={{ textAlign: 'center' }}>
+                {signUpError}
+              </Typography>
+            )}
             <FormControl>
               <FormLabel htmlFor="name">Full name</FormLabel>
               <TextField
@@ -191,9 +223,10 @@ export default function SignUp(props) {
               type="submit"
               fullWidth
               variant="contained"
+              disabled={isLoading}
               onClick={validateInputs}
             >
-              Sign up
+              {isLoading ? 'Signing up...' : 'Sign up'}
             </Button>
           </Box>
           <Divider>

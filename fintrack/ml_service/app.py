@@ -93,6 +93,8 @@ def predict_spending():
         if df.empty:
             return jsonify({'error': 'No valid transaction data after processing'}), 400
         
+        # Ensure amount is numeric
+        df['amount'] = pd.to_numeric(df['amount'], errors='coerce')
         # Feature engineering
         df['amount_abs'] = df['amount'].abs()
         df['month_sin'] = np.sin(2 * np.pi * df['month']/12)
@@ -268,6 +270,10 @@ def recommend_budget():
         
         if df.empty:
             return jsonify({'error': 'No valid transaction data after processing'}), 400
+        
+        # Ensure amount is numeric and create amount_abs
+        df['amount'] = pd.to_numeric(df['amount'], errors='coerce')
+        df['amount_abs'] = df['amount'].abs()
         
         # Extract expense transactions only
         expenses_df = df[df['transaction_type'] == 'Expense']

@@ -11,15 +11,15 @@ function cleanup() {
 # Trap SIGINT and SIGTERM signals to call cleanup
 trap cleanup SIGINT SIGTERM
 
-# # Start ML Service
-# echo "Starting ML Service..."
-# cd ml_service || { echo "Failed to cd into ml_service"; exit 1; }
-# ./run.sh &
+# Start ML Service
+echo "Starting ML Service..."
+cd ml_service || { echo "Failed to cd into ml_service"; exit 1; }
+./run.sh &
 # ml_pid=$!
 
 # Start Backend Server
 echo "Starting Server..."
-cd server || { echo "Failed to cd into server"; exit 1; }
+cd ../server || { echo "Failed to cd into server"; exit 1; }
 npm start &
 server_pid=$!
 

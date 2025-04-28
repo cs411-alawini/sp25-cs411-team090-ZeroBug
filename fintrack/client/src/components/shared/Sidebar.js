@@ -19,6 +19,7 @@ import AnalyticsIcon from '@mui/icons-material/Analytics';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import SearchIcon from '@mui/icons-material/Search';
 import AssessmentIcon from '@mui/icons-material/Assessment';
+import SavingsIcon from '@mui/icons-material/Savings';
 
 const drawerWidth = 240;
 
@@ -35,6 +36,7 @@ export default function Sidebar({ open, onClose }) {
     { text: 'Spending Analysis', icon: <AnalyticsIcon />, path: '/analysis' },
     { text: 'Budget Status', icon: <AssessmentIcon />, path: '/budget-status' },
     { text: 'Transfer Savings', icon: <SwapHorizIcon />, path: '/transfer-savings' },
+    { text: 'Savings Goals', icon: <SavingsIcon />, path: '/saving-goals' },
     { text: 'Advanced Search', icon: <SearchIcon />, path: '/advanced-search' },
     { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },
   ];

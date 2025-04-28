@@ -9,6 +9,9 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import TextField from '@mui/material/TextField';
+import PageWrapper from '../shared/PageWrapper';
+import AppTheme from '../shared-theme/AppTheme';
+import Sidebar from '../shared/Sidebar';
 
 export default function BudgetStatus() {
   const [userId, setUserId] = useState(null);
@@ -77,99 +80,118 @@ export default function BudgetStatus() {
   };
 
   return (
-    <Box sx={{ mt: 3, p: 2 }}>
-      <Typography variant="h4" gutterBottom>
-        Budget Status
-      </Typography>
-      
-      <Paper sx={{ p: 2, mb: 3 }}>
-        <LocalizationProvider dateAdapter={AdapterDateFns}>
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} md={6}>
-              <DatePicker
-                label="Select Month"
-                views={['month', 'year']}
-                value={selectedMonth}
-                onChange={(newValue) => setSelectedMonth(newValue)}
-                renderInput={(params) => <TextField {...params} fullWidth />}
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Typography variant="h6">
-                {selectedMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
-              </Typography>
-            </Grid>
-          </Grid>
-        </LocalizationProvider>
-      </Paper>
-      
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>
-      )}
-      
-      <Paper sx={{ p: 2 }}>
-        {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-            <CircularProgress />
-          </Box>
-        ) : budgetData.length > 0 ? (
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Category</TableCell>
-                  <TableCell align="right">Spent</TableCell>
-                  <TableCell align="right">Budget</TableCell>
-                  <TableCell align="right">Remaining</TableCell>
-                  <TableCell>Progress</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Recommendation</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {budgetData.map((row, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{row.Category}</TableCell>
-                    <TableCell align="right">${parseFloat(row['Amount Spent']).toFixed(2)}</TableCell>
-                    <TableCell align="right">${parseFloat(row['Budget Limit']).toFixed(2)}</TableCell>
-                    <TableCell align="right">${parseFloat(row['Remaining Budget']).toFixed(2)}</TableCell>
-                    <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Box sx={{ width: '100%', mr: 1 }}>
-                          <LinearProgress 
-                            variant="determinate" 
-                            value={Math.min(parseFloat(row['Percentage Used']), 100)} 
-                            color={getProgressColor(parseFloat(row['Percentage Used']))}
-                          />
-                        </Box>
-                        <Box sx={{ minWidth: 35 }}>
-                          <Typography variant="body2" color="text.secondary">
-                            {`${parseFloat(row['Percentage Used']).toFixed(0)}%`}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </TableCell>
-                    <TableCell>
-                      <Chip 
-                        label={row.Status} 
-                        color={getStatusColor(row.Status)} 
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>{row.Recommendation}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        ) : (
-          <Box sx={{ p: 2, textAlign: 'center' }}>
-            <Typography variant="body1" color="textSecondary">
-              No budget data available for this month.
+    <AppTheme>
+      <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        {/* App Bar would go here */}
+        
+        {/* Sidebar would go here */}
+        
+        {/* Main content */}
+        <Box
+          component="main"
+          sx={{
+            flexGrow: 1,
+            pt: 8, // Space for fixed AppBar
+            px: 2,
+            backgroundColor: 'background.default',
+          }}
+        >
+          <Box sx={{ mt: 3, p: 2 }}>
+            <Typography variant="h4" gutterBottom>
+              Budget Status
             </Typography>
+            
+            <Paper sx={{ p: 2, mb: 3 }}>
+              <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <Grid container spacing={2} alignItems="center">
+                  <Grid item xs={12} md={6}>
+                    <DatePicker
+                      label="Select Month"
+                      views={['month', 'year']}
+                      value={selectedMonth}
+                      onChange={(newValue) => setSelectedMonth(newValue)}
+                      renderInput={(params) => <TextField {...params} fullWidth />}
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <Typography variant="h6">
+                      {selectedMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </LocalizationProvider>
+            </Paper>
+            
+            {error && (
+              <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>
+            )}
+            
+            <Paper sx={{ p: 2 }}>
+              {loading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+                  <CircularProgress />
+                </Box>
+              ) : budgetData.length > 0 ? (
+                <TableContainer>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Category</TableCell>
+                        <TableCell align="right">Spent</TableCell>
+                        <TableCell align="right">Budget</TableCell>
+                        <TableCell align="right">Remaining</TableCell>
+                        <TableCell>Progress</TableCell>
+                        <TableCell>Status</TableCell>
+                        <TableCell>Recommendation</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {budgetData.map((row, index) => (
+                        <TableRow key={index}>
+                          <TableCell>{row.Category}</TableCell>
+                          <TableCell align="right">${parseFloat(row['Amount Spent']).toFixed(2)}</TableCell>
+                          <TableCell align="right">${parseFloat(row['Budget Limit']).toFixed(2)}</TableCell>
+                          <TableCell align="right">${parseFloat(row['Remaining Budget']).toFixed(2)}</TableCell>
+                          <TableCell>
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                              <Box sx={{ width: '100%', mr: 1 }}>
+                                <LinearProgress 
+                                  variant="determinate" 
+                                  value={Math.min(parseFloat(row['Percentage Used']), 100)} 
+                                  color={getProgressColor(parseFloat(row['Percentage Used']))}
+                                />
+                              </Box>
+                              <Box sx={{ minWidth: 35 }}>
+                                <Typography variant="body2" color="text.secondary">
+                                  {`${parseFloat(row['Percentage Used']).toFixed(0)}%`}
+                                </Typography>
+                              </Box>
+                            </Box>
+                          </TableCell>
+                          <TableCell>
+                            <Chip 
+                              label={row.Status} 
+                              color={getStatusColor(row.Status)} 
+                              size="small"
+                            />
+                          </TableCell>
+                          <TableCell>{row.Recommendation}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              ) : (
+                <Box sx={{ p: 2, textAlign: 'center' }}>
+                  <Typography variant="body1" color="textSecondary">
+                    No budget data available for this month.
+                  </Typography>
+                </Box>
+              )}
+            </Paper>
           </Box>
-        )}
-      </Paper>
-    </Box>
+        </Box>
+      </Box>
+    </AppTheme>
   );
 }
