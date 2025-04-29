@@ -110,11 +110,13 @@ const MachineLearningAnalytics = ({ userId, baseCurrency }) => {
         // First get transaction data
         const response = await axios.get(`/api/transactions/user/${userId}`);
         const transactionsData = response.data;
+        console.log('Transactions data:', transactionsData);
         
         // Send transaction data to ML service for prediction
         const mlResponse = await axios.post('http://34.44.184.196:5001/api/ml/predict', {
           transactions: transactionsData
         });
+        console.log('ML response:', mlResponse.data);
         
         // Handle the ML predictions from Python service
         const predictionsData = mlResponse.data;

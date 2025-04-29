@@ -93,7 +93,7 @@ router.post('/batch-transactions', async (req, res) => {
   }
 });
 
-// Advanced search with SET operator example
+// Advanced search with combined query
 router.get('/advanced-search/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
@@ -109,62 +109,56 @@ router.get('/advanced-search/:userId', async (req, res) => {
       categoryArray = categories.split(',').map(c => parseInt(c.trim()));
     }
     
-    // Build advanced search query with UNION (SET operator)
+    // Build advanced search query with combined conditions
     let query = `
-      (SELECT t.*, c.category_name, 'description_match' as match_type
-       FROM Transaction t
-       JOIN Category c ON t.category_id = c.category_id
-       WHERE t.user_id = ?
-       ${keywordArray.length > 0 ? 
-         `AND (${keywordArray.map(() => 't.description LIKE ?').join(' OR ')})` : ''}
-       ${minAmount ? 'AND t.amount >= ?' : ''}
-       ${maxAmount ? 'AND t.amount <= ?' : ''})
-      
-      UNION
-      
-      (SELECT t.*, c.category_name, 'category_match' as match_type
-       FROM Transaction t
-       JOIN Category c ON t.category_id = c.category_id
-       WHERE t.user_id = ?
-       ${categoryArray.length > 0 ? 
-         `AND t.category_id IN (${categoryArray.map(() => '?').join(',')})` : ''}
-       ${minAmount ? 'AND t.amount >= ?' : ''}
-       ${maxAmount ? 'AND t.amount <= ?' : ''})
-      
-      ORDER BY transaction_date DESC
-      LIMIT 100
+      SELECT t.*, c.category_name,
+        CASE 
+          WHEN (${keywordArray.length > 0} AND t.category_id IN (${categoryArray.length > 0 ? categoryArray.map(() => '?').join(',') : '0'})) THEN 'both'
+          WHEN ${keywordArray.length > 0} THEN 'description_match'
+          ELSE 'category_match'
+        END as match_type
+      FROM Transaction t
+      JOIN Category c ON t.category_id = c.category_id
+      WHERE t.user_id = ?
     `;
-    
-    // Prepare parameters
+
+    let conditions = [];
     let params = [userId];
-    
-    // Add keyword parameters
+
+    // Add keyword conditions if present
     if (keywordArray.length > 0) {
+      conditions.push(`(${keywordArray.map(() => 't.description LIKE ?').join(' OR ')})`);
       keywordArray.forEach(keyword => {
         params.push(`%${keyword}%`);
       });
     }
-    
-    // Add amount parameters for first query
-    if (minAmount) params.push(parseFloat(minAmount));
-    if (maxAmount) params.push(parseFloat(maxAmount));
-    
-    // Add parameters for second query (after UNION)
-    params.push(userId);
-    
-    // Add category parameters
+
+    // Add category conditions if present
     if (categoryArray.length > 0) {
-      categoryArray.forEach(categoryId => {
-        params.push(categoryId);
-      });
+      conditions.push(`t.category_id IN (${categoryArray.map(() => '?').join(',')})`);
+      params = params.concat(categoryArray);
+      // Add category params again for the CASE statement
+      params = params.concat(categoryArray);
     }
-    
-    // Add amount parameters again for second query
-    if (minAmount) params.push(parseFloat(minAmount));
-    if (maxAmount) params.push(parseFloat(maxAmount));
+
+    // Add amount conditions if present
+    if (minAmount) {
+      conditions.push('t.amount >= ?');
+      params.push(parseFloat(minAmount));
+    }
+    if (maxAmount) {
+      conditions.push('t.amount <= ?');
+      params.push(parseFloat(maxAmount));
+    }
+
+    // Add WHERE conditions if any exist
+    if (conditions.length > 0) {
+      query += ` AND (${conditions.join(' OR ')})`;
+    }
+
+    query += ` ORDER BY t.transaction_date DESC LIMIT 100`;
     
     const [results] = await db.query(query, params);
-    
     res.json(results);
   } catch (error) {
     console.error('Error in advanced search:', error);

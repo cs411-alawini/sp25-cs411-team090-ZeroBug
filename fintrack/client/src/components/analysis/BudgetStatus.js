@@ -3,17 +3,34 @@ import axios from 'axios';
 import {
   Box, Typography, Paper, Grid, Button, CircularProgress,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  LinearProgress, Chip, Alert
+  LinearProgress, Chip, Alert, AppBar, Toolbar, IconButton, Container
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import TextField from '@mui/material/TextField';
-import PageWrapper from '../shared/PageWrapper';
+import MenuIcon from '@mui/icons-material/Menu';
 import AppTheme from '../shared-theme/AppTheme';
+import ColorModeSelect from '../shared-theme/ColorModeSelect';
 import Sidebar from '../shared/Sidebar';
+import { styled } from '@mui/material/styles';
+
+// Styled components
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  backgroundColor: theme.palette.background.paper,
+  borderRadius: 16,
+  padding: theme.spacing(2),
+  height: '100%',
+  boxShadow: theme.palette.mode === 'dark' 
+    ? '0px 2px 6px rgba(0, 0, 0, 0.2)' 
+    : '0px 2px 6px rgba(0, 0, 0, 0.05)',
+  [theme.breakpoints.up('md')]: {
+    padding: theme.spacing(3),
+  },
+}));
 
 export default function BudgetStatus() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userId, setUserId] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [budgetData, setBudgetData] = useState([]);
@@ -57,6 +74,11 @@ export default function BudgetStatus() {
     fetchBudgetStatus();
   }, [userId, selectedMonth]);
 
+  // Handle drawer toggle
+  const handleDrawerToggle = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
   // Get color for budget status
   const getStatusColor = (status) => {
     switch (status) {
@@ -82,9 +104,36 @@ export default function BudgetStatus() {
   return (
     <AppTheme>
       <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        {/* App Bar would go here */}
+        {/* App Bar */}
+        <AppBar 
+          position="fixed" 
+          color="default"
+          elevation={0}
+          sx={{
+            zIndex: (theme) => theme.zIndex.drawer + 1,
+            bgcolor: 'background.paper',
+            borderBottom: '1px solid #E2E8F0',
+          }}
+        >
+          <Toolbar>
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              edge="start"
+              onClick={handleDrawerToggle}
+              sx={{ mr: 2 }}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1, color: 'text.primary' }}>
+              Budget Status
+            </Typography>
+            <ColorModeSelect sx={{ ml: 1 }} />
+          </Toolbar>
+        </AppBar>
         
-        {/* Sidebar would go here */}
+        {/* Sidebar */}
+        <Sidebar open={sidebarOpen} onClose={handleDrawerToggle} />
         
         {/* Main content */}
         <Box
@@ -96,12 +145,12 @@ export default function BudgetStatus() {
             backgroundColor: 'background.default',
           }}
         >
-          <Box sx={{ mt: 3, p: 2 }}>
-            <Typography variant="h4" gutterBottom>
-              Budget Status
-            </Typography>
-            
-            <Paper sx={{ p: 2, mb: 3 }}>
+          <Container maxWidth="lg" sx={{ py: 3 }}>
+            <StyledPaper sx={{ p: 3, mb: 4 }}>
+              <Typography variant="h5" gutterBottom sx={{ color: 'text.primary', fontWeight: 600, mb: 3 }}>
+                Budget Status
+              </Typography>
+              
               <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <Grid container spacing={2} alignItems="center">
                   <Grid item xs={12} md={6}>
@@ -120,13 +169,13 @@ export default function BudgetStatus() {
                   </Grid>
                 </Grid>
               </LocalizationProvider>
-            </Paper>
+            </StyledPaper>
             
             {error && (
               <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>
             )}
             
-            <Paper sx={{ p: 2 }}>
+            <StyledPaper>
               {loading ? (
                 <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
                   <CircularProgress />
@@ -183,13 +232,13 @@ export default function BudgetStatus() {
                 </TableContainer>
               ) : (
                 <Box sx={{ p: 2, textAlign: 'center' }}>
-                  <Typography variant="body1" color="textSecondary">
+                  <Typography variant="body1" color="text.secondary">
                     No budget data available for this month.
                   </Typography>
                 </Box>
               )}
-            </Paper>
-          </Box>
+            </StyledPaper>
+          </Container>
         </Box>
       </Box>
     </AppTheme>

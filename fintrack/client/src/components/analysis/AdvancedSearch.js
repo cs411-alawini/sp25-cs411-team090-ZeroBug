@@ -293,8 +293,20 @@ export default function AdvancedSearch() {
                             <TableCell>
                               <Chip
                                 size="small"
-                                label={transaction.match_type === 'description_match' ? 'Keyword' : 'Category'}
-                                color={transaction.match_type === 'description_match' ? 'primary' : 'secondary'}
+                                label={
+                                  transaction.match_type === 'both' 
+                                    ? 'Keyword & Category' 
+                                    : transaction.match_type === 'description_match' 
+                                      ? 'Keyword' 
+                                      : 'Category'
+                                }
+                                color={
+                                  transaction.match_type === 'both'
+                                    ? 'success'
+                                    : transaction.match_type === 'description_match' 
+                                      ? 'primary' 
+                                      : 'secondary'
+                                }
                               />
                             </TableCell>
                           </TableRow>

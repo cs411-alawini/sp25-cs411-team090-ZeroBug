@@ -106,9 +106,7 @@ export const SyncedExpenseCharts = () => {
     margin: { top: 10, bottom: 30, left: 40, right: 30 },
     slotProps: {
       legend: {
-        direction: 'row',
-        position: { vertical: 'bottom', horizontal: 'middle' },
-        padding: 0,
+        hidden: true,
       },
     },
   };

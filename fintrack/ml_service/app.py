@@ -110,7 +110,7 @@ def predict_spending():
             category_data = df[df['category_name'] == category]
             
             # Only predict if we have sufficient data points
-            if len(category_data) >= 5:
+            if len(category_data) >= 3:
                 # Features for prediction
                 X = category_data[['month_sin', 'month_cos', 'day_sin', 'day_cos', 'year']]
                 y = category_data['amount_abs']
@@ -221,7 +221,7 @@ def detect_anomalies(df):
     for category in df['category_name'].unique():
         category_data = df[df['category_name'] == category]
         
-        if len(category_data) < 5:  # Skip categories with too few data points
+        if len(category_data) < 2:  # Lower from 5 to 2
             continue
         
         amounts = category_data['amount_abs']
