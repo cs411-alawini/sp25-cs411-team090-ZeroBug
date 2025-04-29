@@ -1,7 +1,7 @@
 # Final Project Report - FinTrack
 
 
-## [Demo Video](https://youtu.be/Vk1OCDoUbeY)
+## [Demo Video](https://www.youtube.com/watch?v=wXiI54BKEgs)
 
 
 ## Changes from Original Proposal
