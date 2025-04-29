@@ -10,7 +10,6 @@ import Analytics from './components/analytics/Analytics';
 import SavingGoals from './components/savings/SavingGoals';
 import SavingsTransfer from './components/savings/SavingsTransfer';
 import AdvancedSearch from './components/analysis/AdvancedSearch';
-import BudgetStatus from './components/analysis/BudgetStatus';
 import Settings from './pages/Settings';
 import './index.css';
 import AnalyticsIcon from '@mui/icons-material/Analytics';
@@ -20,11 +19,6 @@ import AssessmentIcon from '@mui/icons-material/Assessment';
 
 function App() {
   const menuItems = [
-    {
-      text: 'Budget Status',
-      icon: <AssessmentIcon />,
-      path: '/budget-status'
-    },
     {
       text: 'Transfer Savings',
       icon: <SwapHorizIcon />,
@@ -51,7 +45,6 @@ function App() {
           <Route path="/saving-goals" element={<SavingGoals />} />
           <Route path="/transfer-savings" element={<SavingsTransfer />} />
           <Route path="/advanced-search" element={<AdvancedSearch />} />
-          <Route path="/budget-status" element={<BudgetStatus />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/" element={<Navigate to="/login" />} />
           {/* Add more routes as needed */}
